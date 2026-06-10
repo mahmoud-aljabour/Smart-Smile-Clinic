@@ -11,4 +11,5 @@ $web_root = "http://localhost:8080/DentalClinic/";
 
 define('web_root', $web_root);
 define('app_name', 'Smart Smile Clinic');
-define('app_logo', web_root . 'dist/img/logo.png');
+define('app_tagline', 'A complete clinic management platform, appointments, patient records, and billing in one secure workspace.');
+define('app_logo', web_root . 'dist/img/Smart_Smile_Clinic_logo_v2.svg');

@@ -22,8 +22,8 @@ if (isset($_SESSION['ADMIN_USERID'])) {
       <div class="col-lg-6 d-none d-lg-flex login-brand-panel">
         <img src="<?php echo app_logo; ?>" alt="<?php echo htmlspecialchars(app_name); ?>">
         <h2 class="fw-bold text-center mb-3"><?php echo htmlspecialchars(app_name); ?></h2>
-        <p class="text-center opacity-75 mb-0" style="max-width: 320px;">
-          Modern dental practice management — appointments, patients, and billing in one place.
+        <p class="text-center opacity-75 mb-0" style="max-width: 340px;">
+          <?php echo htmlspecialchars(app_tagline); ?>
         </p>
         <div class="mt-4 d-flex gap-3 opacity-75">
           <span><i class="bi bi-shield-check me-1"></i> Secure</span>

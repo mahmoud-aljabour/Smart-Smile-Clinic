@@ -1,9 +1,10 @@
+<?php require_once __DIR__ . '/include/config.php'; ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pearl Dental Clinic</title>
+    <title><?php echo htmlspecialchars(app_name); ?></title>
 
     <!-- خط Titillium Web للنصوص الإنجليزية -->
     <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@700&display=swap" rel="stylesheet">
@@ -142,19 +143,21 @@
 <body>
     <div class="container">
         <!-- شعار أعلى يسار الصفحة -->
-        <img src="logo.png" alt="Logo" class="logo">
+        <img src="<?php echo app_logo; ?>" alt="Logo" class="logo">
 
         <!-- زر تسجيل الدخول -->
         <a href="login.php" class="login-btn">Log in</a>
 
         <!-- الخلفية -->
-        <img src="wep page null logo01.png" alt="Pearl Dental Clinic" class="bg">
+        <img src="wep page null logo01.png" alt="<?php echo htmlspecialchars(app_name); ?>" class="bg">
 
         <!-- النصوص -->
         <div class="text-box">
             <div class="welcome">Welcome to</div>
             <div class="clinic">
-                <span class="pearl">Pearl</span> <span class="dental">Dental Clinic</span>
+                <?php $nameParts = explode(' ', app_name, 2); ?>
+                <span class="pearl"><?php echo htmlspecialchars($nameParts[0]); ?></span>
+                <span class="dental"><?php echo htmlspecialchars($nameParts[1] ?? ''); ?></span>
             </div>
             <div class="tagline">
                 ابتسامتك تبدأ<br>من هنا

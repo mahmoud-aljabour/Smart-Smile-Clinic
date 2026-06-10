@@ -11,7 +11,7 @@
     if ($singleuser != '') {
       echo htmlspecialchars($_SESSION['ADMIN_FULLNAME']);
     } else {
-      echo 'Dental Clinic';
+      echo htmlspecialchars(app_name);
     }
   ?></title>
 

@@ -133,7 +133,6 @@ body {
 .login-brand-panel img {
   max-width: 220px;
   margin-bottom: 2rem;
-  filter: brightness(0) invert(1);
 }
 
 .login-card {

@@ -3,8 +3,8 @@ $settingsActive = in_array(currentpage(), ['user', 'suplier', 'taxrate', 'discou
 ?>
 <aside id="sidebar" class="sidebar">
   <a href="<?php echo web_root; ?>" class="sidebar-brand">
-    <img src="<?php echo web_root; ?>dist/img/logo02.svg" alt="Logo">
-    <span class="sidebar-brand-text">Pearl Dental Clinic</span>
+    <img src="<?php echo app_logo; ?>" alt="Logo">
+    <span class="sidebar-brand-text"><?php echo htmlspecialchars(app_name); ?></span>
   </a>
 
   <nav class="sidebar-nav nav flex-column">

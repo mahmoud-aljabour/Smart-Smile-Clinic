@@ -10,7 +10,7 @@ if (isset($_SESSION['ADMIN_USERID'])) {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <title>Login — Pearl Dental Clinic</title>
+  <title>Login — <?php echo app_name; ?></title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -20,8 +20,8 @@ if (isset($_SESSION['ADMIN_USERID'])) {
   <div class="container-fluid g-0">
     <div class="row g-0 min-vh-100">
       <div class="col-lg-6 d-none d-lg-flex login-brand-panel">
-        <img src="dist/img/logo02.svg" alt="Pearl Dental Clinic">
-        <h2 class="fw-bold text-center mb-3">Pearl Dental Clinic</h2>
+        <img src="<?php echo app_logo; ?>" alt="<?php echo htmlspecialchars(app_name); ?>">
+        <h2 class="fw-bold text-center mb-3"><?php echo htmlspecialchars(app_name); ?></h2>
         <p class="text-center opacity-75 mb-0" style="max-width: 320px;">
           Modern dental practice management — appointments, patients, and billing in one place.
         </p>
@@ -35,7 +35,7 @@ if (isset($_SESSION['ADMIN_USERID'])) {
       <div class="col-lg-6 login-form-wrap">
         <div class="w-100" style="max-width: 420px;">
           <div class="text-center d-lg-none mb-4">
-            <img src="dist/img/logo02.svg" alt="Logo" style="max-width: 120px;">
+            <img src="<?php echo app_logo; ?>" alt="Logo" style="max-width: 120px;">
           </div>
 
           <div class="card login-card">
@@ -76,7 +76,7 @@ if (isset($_SESSION['ADMIN_USERID'])) {
           </div>
 
           <p class="text-center text-muted small mt-4 mb-0">
-            &copy; <?php echo date('Y'); ?> Pearl Dental Clinic
+            &copy; <?php echo date('Y'); ?> <?php echo htmlspecialchars(app_name); ?>
           </p>
         </div>
       </div>

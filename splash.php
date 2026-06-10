@@ -145,7 +145,7 @@
         <img src="logo.png" alt="Logo" class="logo">
 
         <!-- زر تسجيل الدخول -->
-        <a href="login.html" class="login-btn">Log in</a>
+        <a href="login.php" class="login-btn">Log in</a>
 
         <!-- الخلفية -->
         <img src="wep page null logo01.png" alt="Pearl Dental Clinic" class="bg">

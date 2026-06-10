@@ -1,0 +1,151 @@
+/**
+ * DentalClinic Design Tokens
+ * Bootstrap 5.3 + custom medical theme
+ */
+
+:root {
+  --dc-primary: #0ea5e9;
+  --dc-primary-dark: #0284c7;
+  --dc-primary-light: #e0f2fe;
+  --dc-secondary: #3b82f6;
+  --dc-accent: #14b8a6;
+  --dc-accent-light: #ccfbf1;
+  --dc-bg: #f8fafc;
+  --dc-surface: #ffffff;
+  --dc-text: #1e293b;
+  --dc-text-muted: #64748b;
+  --dc-border: #e2e8f0;
+  --dc-sidebar-width: 260px;
+  --dc-sidebar-collapsed: 72px;
+  --dc-navbar-height: 64px;
+  --dc-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+  --dc-shadow-lg: 0 10px 40px rgba(15, 23, 42, 0.12);
+  --dc-radius: 12px;
+  --dc-radius-sm: 8px;
+  --bs-primary: var(--dc-primary);
+  --bs-primary-rgb: 14, 165, 233;
+  --bs-body-bg: var(--dc-bg);
+  --bs-body-color: var(--dc-text);
+  --bs-border-color: var(--dc-border);
+  --bs-link-color: var(--dc-primary);
+  --bs-link-hover-color: var(--dc-primary-dark);
+}
+
+[data-bs-theme="dark"] {
+  --dc-bg: #0f172a;
+  --dc-surface: #1e293b;
+  --dc-text: #f1f5f9;
+  --dc-text-muted: #94a3b8;
+  --dc-border: #334155;
+  --dc-primary-light: #0c4a6e;
+  --dc-accent-light: #134e4a;
+  --dc-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --dc-shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.4);
+  --bs-body-bg: var(--dc-bg);
+  --bs-body-color: var(--dc-text);
+  --bs-border-color: var(--dc-border);
+}
+
+/* RTL-ready hooks */
+[dir="rtl"] .sidebar {
+  left: auto;
+  right: 0;
+}
+
+[dir="rtl"] .main-content {
+  margin-left: 0;
+  margin-right: var(--dc-sidebar-width);
+}
+
+[dir="rtl"] .sidebar-nav .nav-link i {
+  margin-right: 0;
+  margin-left: 0.75rem;
+}
+
+body {
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background-color: var(--dc-bg);
+  color: var(--dc-text);
+}
+
+.btn-primary {
+  --bs-btn-bg: var(--dc-primary);
+  --bs-btn-border-color: var(--dc-primary);
+  --bs-btn-hover-bg: var(--dc-primary-dark);
+  --bs-btn-hover-border-color: var(--dc-primary-dark);
+  --bs-btn-active-bg: var(--dc-primary-dark);
+  --bs-btn-active-border-color: var(--dc-primary-dark);
+}
+
+.text-primary {
+  color: var(--dc-primary) !important;
+}
+
+.bg-primary {
+  background-color: var(--dc-primary) !important;
+}
+
+/* Bootstrap 3 compatibility shims */
+.pull-right {
+  float: right !important;
+}
+
+.pull-left {
+  float: left !important;
+}
+
+.hidden-xs {
+  display: inline !important;
+}
+
+@media (max-width: 767.98px) {
+  .hidden-xs {
+    display: none !important;
+  }
+}
+
+.col-xs-12 {
+  flex: 0 0 auto;
+  width: 100%;
+}
+
+/* Login page */
+.login-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--dc-primary-light) 0%, var(--dc-bg) 50%, var(--dc-accent-light) 100%);
+}
+
+[data-bs-theme="dark"] .login-page {
+  background: linear-gradient(135deg, #0c4a6e 0%, #0f172a 50%, #134e4a 100%);
+}
+
+.login-brand-panel {
+  background: linear-gradient(160deg, var(--dc-primary) 0%, var(--dc-secondary) 100%);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  min-height: 100vh;
+}
+
+.login-brand-panel img {
+  max-width: 220px;
+  margin-bottom: 2rem;
+  filter: brightness(0) invert(1);
+}
+
+.login-card {
+  border: none;
+  border-radius: var(--dc-radius);
+  box-shadow: var(--dc-shadow-lg);
+}
+
+.login-form-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2rem;
+}

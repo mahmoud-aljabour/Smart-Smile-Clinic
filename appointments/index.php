@@ -27,6 +27,11 @@ switch ($view) {
 	default :
 		$content    = 'list.php';		
 }
+
+if ($content === 'list.php') {
+	$pageScript = __DIR__ . '/list-scripts.php';
+}
+
 require_once ("../theme/templates.php");
 ?>
   

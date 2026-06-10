@@ -1,102 +1,89 @@
-<?php 
+<?php
 require_once("include/initialize.php");
 
-if(isset($_SESSION['ADMIN_USERID'])){
-  redirect(web_root."index.php");
+if (isset($_SESSION['ADMIN_USERID'])) {
+  redirect(web_root . "index.php");
 }
- 
- ?> 
-
- <style type="text/css">
-        body{
-        background: #3c8dbc;
-          background: -webkit-linear-gradient(left, #75e3f0, #3c8dbc);
-          background: -o-linear-gradient(left, #75e3f0, #3c8dbc);
-          background: -moz-linear-gradient(left, #75e3f0, #3c8dbc);
-          background: linear-gradient(left, #75e3f0, #3c8dbc);
-
-          color: #fff;
-    }
- </style>
+?>
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="en" dir="ltr">
 <head>
-
   <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta name="description" content="">
-  <meta name="author" content="">
-
-  <title>Dental Clinic</title>
-
-  <!-- Custom fonts for this template-->
-  <!-- <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css"> -->
-  <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
-
-  <!-- Custom styles for this template-->
-  <link href="css/sb-admin-2.min.css" rel="stylesheet">
-
+  <title>Login — Pearl Dental Clinic</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="<?php echo web_root; ?>assets/css/theme.css" rel="stylesheet">
 </head>
-<style type="text/css">
-  .d-none img{
-    width: 100%;
-    padding:10px;
-  }
-</style>
-
-<body class="">
-
-  <div class="container">
-
-    <!-- Outer Row -->
-    <div class="row justify-content-center">
-
-      <div class="col-xl-10 col-lg-12 col-md-9">
-
-        <div class="card o-hidden border-0 shadow-lg my-5">
-          <div class="card-body p-0">
-            <!-- Nested Row within Card Body -->
-            <div class="row">
-              <div class="col-lg-6 d-none d-lg-block login-image-stretch">
-                <img src="dist/img/logo02.svg">
-              </div>
-              <div class="col-lg-6">
-                <div class="p-5">
-                  <div class="text-center">
-                    <h1 class="h4 text-gray-900 mb-4">Login!</h1>
-                    <div style="font-size: 12px"> <?php check_message();?></div> 
-                  </div>
-                  <form class="user" method="POST" action="process.php">
-                    <div class="form-group">
-                      <input type="input" class="form-control form-control-user" id="user_email"  name="user_email" aria-describedby="emailHelp" placeholder="Enter Username...">
-                    </div>
-                    <div class="form-group">
-                      <input type="password" class="form-control form-control-user" id="user_pass" name="user_pass"  placeholder="Password">
-                    </div> 
-                    <button type="submit" name="btnLogin" class="btn btn-primary btn-user btn-block">
-                      Login
-                    </button>
-                    <hr>
-                     
-                  </form> 
-                </div>
-              </div>
-            </div>
-          </div>
+<body class="login-page">
+  <div class="container-fluid g-0">
+    <div class="row g-0 min-vh-100">
+      <div class="col-lg-6 d-none d-lg-flex login-brand-panel">
+        <img src="dist/img/logo02.svg" alt="Pearl Dental Clinic">
+        <h2 class="fw-bold text-center mb-3">Pearl Dental Clinic</h2>
+        <p class="text-center opacity-75 mb-0" style="max-width: 320px;">
+          Modern dental practice management — appointments, patients, and billing in one place.
+        </p>
+        <div class="mt-4 d-flex gap-3 opacity-75">
+          <span><i class="bi bi-shield-check me-1"></i> Secure</span>
+          <span><i class="bi bi-heart-pulse me-1"></i> Clinical</span>
+          <span><i class="bi bi-clock me-1"></i> Efficient</span>
         </div>
-
       </div>
 
-    </div>
+      <div class="col-lg-6 login-form-wrap">
+        <div class="w-100" style="max-width: 420px;">
+          <div class="text-center d-lg-none mb-4">
+            <img src="dist/img/logo02.svg" alt="Logo" style="max-width: 120px;">
+          </div>
 
+          <div class="card login-card">
+            <div class="card-body p-4 p-md-5">
+              <div class="text-center mb-4">
+                <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3"
+                     style="width: 56px; height: 56px; background: var(--dc-primary-light); color: var(--dc-primary);">
+                  <i class="bi bi-person-lock fs-4"></i>
+                </div>
+                <h1 class="h4 fw-bold mb-1">Welcome back</h1>
+                <p class="text-muted small mb-0">Sign in to your clinic dashboard</p>
+              </div>
+
+              <div class="mb-3"><?php check_message(); ?></div>
+
+              <form method="POST" action="process.php">
+                <div class="mb-3">
+                  <label for="user_email" class="form-label small fw-semibold">Username</label>
+                  <div class="input-group">
+                    <span class="input-group-text bg-transparent"><i class="bi bi-person"></i></span>
+                    <input type="text" class="form-control" id="user_email" name="user_email"
+                           placeholder="Enter username" required autofocus>
+                  </div>
+                </div>
+                <div class="mb-4">
+                  <label for="user_pass" class="form-label small fw-semibold">Password</label>
+                  <div class="input-group">
+                    <span class="input-group-text bg-transparent"><i class="bi bi-lock"></i></span>
+                    <input type="password" class="form-control" id="user_pass" name="user_pass"
+                           placeholder="Enter password" required>
+                  </div>
+                </div>
+                <button type="submit" name="btnLogin" class="btn btn-primary w-100 py-2 fw-semibold">
+                  <i class="bi bi-box-arrow-in-right me-1"></i> Sign In
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <p class="text-center text-muted small mt-4 mb-0">
+            &copy; <?php echo date('Y'); ?> Pearl Dental Clinic
+          </p>
+        </div>
+      </div>
+    </div>
   </div>
 
-
-
- 
-
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="<?php echo web_root; ?>assets/js/theme.js"></script>
 </body>
-
 </html>

@@ -258,12 +258,13 @@ Toggle via the moon/sun icon in the navbar. Preference is stored in `localStorag
 
 ---
 
-## License
-
-Private / internal use unless a license file is added.
-
----
-
 ## Author
 
-Smart Smile Clinic — Dental Clinic Management System
+| | |
+|---|---|
+| **Developer** | Mahmoud Al-Jabour |
+| **Role** | Full-Stack Web Developer |
+| **Stack** | PHP, MySQL, Bootstrap 5, jQuery |
+| **Client** | Smart Smile Clinic |
+
+**Links:** [GitHub](https://github.com/mahmoud-aljabour) · [Portfolio](https://github.com/mahmoud-aljabour/portfolio) · [LinkedIn](https://www.linkedin.com/in/mahmoud-al-jabour/)

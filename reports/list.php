@@ -1,149 +1,146 @@
 <?php
 if (!isset($_SESSION['ADMIN_USERID'])) {
-	redirect(web_root . "admin/index.php");
+  redirect(web_root . "login.php");
 }
 
+$dateFrom = isset($_POST['date_from']) ? $_POST['date_from'] : date('m/d/Y');
+$dateTo = isset($_POST['date_to']) ? $_POST['date_to'] : date('m/d/Y');
+$submitted = isset($_POST['submit']);
+$currency = $setDefault->default_currency();
+
+$datefrom = $submitted ? date_format(date_create($dateFrom), 'Y-m-d') : '';
+$dateto = $submitted ? date_format(date_create($dateTo), 'Y-m-d') : '';
+
+$totalprice = 0;
+$rows = array();
+
+if ($submitted) {
+  $sql = "SELECT i.Services, i.Price, p.InvoiceDate, p.InvoiceNo
+          FROM tblinvoice i
+          INNER JOIN tblpayments p ON i.InvoiceNo = p.InvoiceNo
+          WHERE p.Status = 'Paid'
+          AND DATE(p.InvoiceDate) >= '{$datefrom}'
+          AND DATE(p.InvoiceDate) <= '{$dateto}'
+          ORDER BY p.InvoiceDate DESC, i.Services ASC";
+  $mydb->setQuery($sql);
+  $rows = $mydb->loadResultList();
+  foreach ($rows as $result) {
+    $totalprice += $result->Price;
+  }
+}
 ?>
 
-<style type="text/css">
-	.row {
-		margin-bottom: 5px;
-	}
-
-	@media print {
-
-		.no-print,
-		.no-print * {
-			display: none !important;
-		}
-	}
+<style>
+  @media print {
+    .no-print,
+    .no-print * {
+      display: none !important;
+    }
+    .report-print-area {
+      box-shadow: none !important;
+      border: none !important;
+    }
+  }
 </style>
-<!-- =============================================== -->
-<form action="" method="POST">
-	<section class="content-header  no-print">
-		<div class="col-md-3"> </div>
-		<div class="col-md-6">
-			<div class="panel">
-				<div class="panel-header"></div>
-				<div class="panel-body ">
-					<div class="row">
-						<div class="col-sm-12 search1">
-							<label class="col-sm-3">Date From:</label>
-							<div class="col-sm-9">
-								<div class="input-group date">
-									<div class="input-group-addon">
-										<i class="fa fa-calendar"></i>
-									</div>
-									<input required autocomplete="off" type="text" value="<?php echo isset($_POST['date_from']) ? $_POST['date_from'] : DATE('m/d/Y'); ?>" name="date_from" class="form-control pull-right date_picker" id="datemask2" placeholder="mm/dd/yyyy">
-								</div>
-							</div>
-						</div>
-					</div>
-					<div class="row">
-						<div class="col-sm-12 search1">
-							<label class="col-sm-3">Date To:</label>
-							<div class="col-sm-9">
-								<div class="input-group date">
-									<div class="input-group-addon">
-										<i class="fa fa-calendar"></i>
-									</div>
-									<input required autocomplete="off" type="text" value="<?php echo isset($_POST['date_to']) ? $_POST['date_to'] : DATE('m/d/Y'); ?>" name="date_to" class="form-control pull-right date_picker" id="datemask2" placeholder="mm/dd/yyyy">
-								</div>
-							</div>
-						</div>
-					</div>
-					<div class="row">
-						<div class="col-sm-12 search1">
-							<label class="col-sm-3"></label>
-							<div class="col-sm-9">
-								<input type="submit" name="submit" class="btn btn-success">
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
 
-		</div>
-		<div class="col-md-3"> </div>
-	</section>
+<div class="page-header-bar no-print">
+  <div>
+    <h1 class="h3 mb-1">Sales Report</h1>
+    <p class="text-muted small mb-0">View paid invoice services by date range</p>
+  </div>
+  <?php if ($submitted && count($rows) > 0): ?>
+    <button type="button" class="btn btn-outline-primary" onclick="window.print()">
+      <i class="bi bi-printer"></i> Print Report
+    </button>
+  <?php endif; ?>
+</div>
+
+<form action="" method="POST" class="form-add-page no-print mb-4">
+  <div class="form-page-card">
+    <div class="card-header">
+      <i class="bi bi-funnel"></i> Filter Report
+    </div>
+    <div class="card-body">
+      <div class="row g-3 align-items-end">
+        <div class="col-md-4">
+          <label class="form-label" for="date_from">Date From</label>
+          <div class="input-group date" data-provide="datepicker" data-date-format="mm/dd/yyyy">
+            <span class="input-group-text"><i class="bi bi-calendar3"></i></span>
+            <input required autocomplete="off" type="text" value="<?php echo htmlspecialchars($dateFrom); ?>" name="date_from" class="form-control date_picker" id="date_from" placeholder="mm/dd/yyyy">
+          </div>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label" for="date_to">Date To</label>
+          <div class="input-group date" data-provide="datepicker" data-date-format="mm/dd/yyyy">
+            <span class="input-group-text"><i class="bi bi-calendar-event"></i></span>
+            <input required autocomplete="off" type="text" value="<?php echo htmlspecialchars($dateTo); ?>" name="date_to" class="form-control date_picker" id="date_to" placeholder="mm/dd/yyyy">
+          </div>
+        </div>
+        <div class="col-md-4">
+          <button type="submit" name="submit" class="btn btn-primary w-100">
+            <i class="bi bi-search"></i> Generate Report
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 </form>
 
-<div class="clear"></div>
-<section class="content col-sm-12">
+<div class="content-card report-print-area">
+  <div class="card-body">
+    <div class="report-meta text-center mb-4">
+      <h2 class="h5 mb-2">Sales Report</h2>
+      <p class="text-muted small mb-1">As of <?php echo date('m/d/Y'); ?></p>
+      <?php if ($submitted): ?>
+        <p class="mb-0">
+          <span class="info-badge">
+            <i class="bi bi-calendar-range"></i>
+            <?php echo htmlspecialchars($dateFrom); ?> — <?php echo htmlspecialchars($dateTo); ?>
+          </span>
+        </p>
+      <?php else: ?>
+        <p class="text-muted small mb-0">Select a date range and click Generate Report</p>
+      <?php endif; ?>
+    </div>
 
-	<p style="text-align: center;font-size: 15px"><br>
-		Sales Report <br />
-		As of <?php echo date('m/d/Y'); ?>
+    <?php if ($submitted): ?>
+      <div class="table-responsive">
+        <table class="table table-modern table-hover table-bordered mb-0">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Service</th>
+              <th>Invoice No.</th>
+              <th>Invoice Date</th>
+              <th class="text-end">Price (<?php echo htmlspecialchars($currency); ?>)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <?php if (count($rows) === 0): ?>
+              <tr>
+                <td colspan="5" class="text-center text-muted py-4">No paid services found for this date range.</td>
+              </tr>
+            <?php else: ?>
+              <?php $counter = 1; foreach ($rows as $result): ?>
+                <tr>
+                  <td><?php echo $counter++; ?></td>
+                  <td><?php echo htmlspecialchars($result->Services); ?></td>
+                  <td><?php echo htmlspecialchars($result->InvoiceNo); ?></td>
+                  <td><?php echo date('m/d/Y', strtotime($result->InvoiceDate)); ?></td>
+                  <td class="text-end"><?php echo number_format($result->Price, 2); ?></td>
+                </tr>
+              <?php endforeach; ?>
+            <?php endif; ?>
+          </tbody>
+        </table>
+      </div>
 
-
-		<?php
-		// $date_taken = isset($_POST['date_taken']) ? date_format(date_create($_POST['date_taken']),"Y-m-d") : "";
-		//  $course  = isset($_POST['Course']) ? $_POST['Course'] : "";
-		//  $semester = isset($_POST['Semester']) ? $_POST['Semester'] : ""; 
-		?>
-
-	<p style="font-size:15px;text-align: center;">
-		Inclusive Dates: <?php echo isset($_POST['date_from']) ? "From : " . $_POST['date_from'] : "Month-Day-Year" ?> | <?php echo isset($_POST['date_to']) ? " To : " . $_POST['date_to'] : "Month-Day-Year" ?></p>
-	</p>
-
-	<div class=" no-print">
-		<center><button type="button" class="btn btn-info pull-center" button onclick="myFunction()">Print Report</button></center>
-	</div>
-	<table class="table table-bordered">
-		<thead>
-			<!-- <th>ProductID</th> -->
-			<th>Services</th>
-			<th width="120">Price</th>
-			<!-- <th>Sold Qty</th> -->
-			<!-- <th>Total Amount</th> -->
-		</thead>
-		<tbody>
-			<?php
-
-			$datefrom = isset($_POST['date_from'])  ?  date_format(date_create($_POST['date_from']), 'Y-m-d') : "";
-			$dateto = isset($_POST['date_to'])  ? date_format(date_create($_POST['date_to']), 'Y-m-d') : "";
-
-			$tot = 0;
-			$totalamount = 0;
-			$totalqty = 0;
-			$totalprice = 0;
-			// SELECT `InvoiceID`, `InvoiceNo`, `SKU`, `Services`, `Price`, `QTY`, `SubTotal`, `Remarks`, `UserID`, `Class` FROM `tblinvoice` WHERE 1
-			// SELECT `PaymentID`, `ORNO`, `InvoiceDate`, `DateDue`, `InvoiceNo`, `TotalQTY`, `TotalAmount`, `Payment`, `Balance`, `PaymentDate`, `Patients`, `UserID`, `Status`, `Class` FROM `tblpayments` WHERE 1
-			$sql = "SELECT * FROM tblinvoice i, tblpayments p 
-			WHERE i.InvoiceNo=p.InvoiceNo 
-			AND p.Status = 'Paid'
-			AND DATE(`InvoiceDate`) >= '" . $datefrom . "' AND DATE(`InvoiceDate`) <= '" . $dateto . "'";
-			$mydb->setQuery($sql);
-			$cur = $mydb->loadResultList();
-			foreach ($cur as $result) {
-				# code...
-				echo '<tr>';
-				// echo '<td>'.$result->ProductID.'</td>';
-				echo '<td>' . $result->Services . '</td>';
-				echo '<td>' . number_format($result->Price, '2') . '</td>';
-				// echo '<td>'.$result->qty.'</td>';
-				// echo '<td>'.$tot = $result->Price * $result->qty.'</td>';
-				echo '</tr>';
-
-				$totalprice += $result->Price;
-			}
-
-			?>
-
-		</tbody>
-		<tfoot>
-			<th colspan="">Total</th>
-			<th><?php echo number_format($totalprice, '2'); ?></th>
-			<!-- <th><?php echo $totalqty; ?></th> -->
-			<!-- <th><?php echo $totalamount; ?></th> -->
-		</tfoot>
-	</table>
-
-
-	<script>
-		function myFunction() {
-			window.print();
-
-		}
-	</script>
-</section>
+      <?php if (count($rows) > 0): ?>
+        <div class="invoice-total-box mt-4">
+          <span class="total-label">Total Revenue</span>
+          <span class="total-value"><?php echo htmlspecialchars($currency); ?> <?php echo number_format($totalprice, 2); ?></span>
+        </div>
+      <?php endif; ?>
+    <?php endif; ?>
+  </div>
+</div>

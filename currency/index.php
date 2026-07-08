@@ -7,7 +7,13 @@ if (!isset($_SESSION['ADMIN_USERID'])) {
 
 $view = (isset($_GET['view']) && $_GET['view'] != '') ? $_GET['view'] : '';
 $header = $view;
-$title = "Manage Currency";
+$title = "Currency";
+$viewLabels = array(
+	'list' => 'Currency',
+	'add' => 'Add Currency',
+	'edit' => 'Edit Currency'
+);
+$breadcrumbLabel = isset($viewLabels[$view]) ? $viewLabels[$view] : 'Currency';
 switch ($view) {
 	case 'list':
 		$content    = 'list.php';

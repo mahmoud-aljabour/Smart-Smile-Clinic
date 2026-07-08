@@ -14,7 +14,8 @@
             <?php
             if (isset($_GET['view'])) {
               echo '<li class="breadcrumb-item"><a href="index.php">' . htmlspecialchars($title) . '</a></li>';
-              echo '<li class="breadcrumb-item active" aria-current="page">' . htmlspecialchars($_GET['view']) . '</li>';
+              $crumb = isset($breadcrumbLabel) ? $breadcrumbLabel : $_GET['view'];
+              echo '<li class="breadcrumb-item active" aria-current="page">' . htmlspecialchars($crumb) . '</li>';
             } else {
               echo '<li class="breadcrumb-item active" aria-current="page">' . htmlspecialchars($title) . '</li>';
             }

@@ -1,12 +1,19 @@
 <?php
 require_once("../include/initialize.php");
 if (!isset($_SESSION['ADMIN_USERID'])) {
-	redirect(web_root . "admin/index.php");
+	redirect(web_root . "login.php");
 }
 
 $view = (isset($_GET['view']) && $_GET['view'] != '') ? $_GET['view'] : '';
-$title = "Manage Users";
+$title = "Users";
 $header = $view;
+$viewLabels = array(
+	'list' => 'Users',
+	'add' => 'Add User',
+	'edit' => 'Edit User',
+	'view' => 'User Profile'
+);
+$breadcrumbLabel = isset($viewLabels[$view]) ? $viewLabels[$view] : ucfirst($view);
 switch ($view) {
 	case 'list':
 		$content    = 'list.php';

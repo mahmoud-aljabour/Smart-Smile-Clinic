@@ -1,104 +1,66 @@
 <?php
 if (!isset($_SESSION['ADMIN_USERID'])) {
-  redirect(web_root . "admin/index.php");
+  redirect(web_root . "login.php");
 }
 
-
-$AUTOKEY = $_GET['id'];
+$AUTOID = (int)$_GET['id'];
 $autonumber = new Autonumber();
-$singleauto = $autonumber->single_autonumber($AUTOKEY);
+$singleauto = $autonumber->single_autonumber($AUTOID);
 
+if (!$singleauto) {
+  message("Autonumber not found.", "error");
+  redirect("index.php");
+}
 ?>
-<form class="form-horizontal span6" action="controller.php?action=edit" method="POST" autocomplete="off">
 
-  <div class="row">
-    <div class="col-lg-12">
-      <h1 class="page-header">Update Autonumber</h1>
-    </div>
-     
+<div class="page-header-bar">
+  <div>
+    <h1 class="h3 mb-1">Edit Autonumber</h1>
+    <p class="text-muted small mb-0"><?php echo htmlspecialchars($singleauto->AUTOKEY); ?></p>
   </div>
+  <a href="index.php" class="btn btn-outline-secondary">
+    <i class="bi bi-arrow-left"></i> Back to List
+  </a>
+</div>
 
-  <!--<div class="form-group">-->
-  <!--           <div class="col-md-8">-->
-  <!--             <label class="col-md-4 control-label" for=-->
-  <!--             "AUTOKEY">Key:</label>-->
-
-  <!--             <div class="col-md-8">-->
-  <input class="form-control input-sm" id="AUTOKEY" name="AUTOKEY" placeholder="Key" type="hidden" value="<?php echo $singleauto->AUTOKEY; ?>">
-  <!--    </div>-->
-  <!--  </div>-->
-  <!--</div>-->
-
-  <div class="form-group">
-    <div class="col-md-8">
-      <label class="col-md-4 control-label" for="AUTOSTART">Prefix:</label>
-
-      <div class="col-md-8">
-        <input type="hidden" name="AUTOID" id="AUTOID" value="<?php echo $singleauto->AUTOID; ?>">
-        <input class="form-control input-sm" id="AUTOSTART" name="AUTOSTART" placeholder="Prefix" type="text" value="<?php echo $singleauto->AUTOSTART; ?>">
-      </div>
+<form action="controller.php?action=edit" method="POST" autocomplete="off" class="form-add-page" novalidate>
+  <div class="form-page-card">
+    <div class="card-header">
+      <i class="bi bi-123"></i> Sequence Details
     </div>
-  </div>
+    <div class="card-body">
+      <input type="hidden" name="AUTOID" value="<?php echo (int)$singleauto->AUTOID; ?>">
+      <input type="hidden" name="AUTOKEY" value="<?php echo htmlspecialchars($singleauto->AUTOKEY); ?>">
 
-
-
-  <div class="form-group">
-    <div class="col-md-8">
-      <label class="col-md-4 control-label" for="AUTOEND">Sequence #:</label>
-
-      <div class="col-md-8">
-        <input class="form-control input-sm" id="AUTOEND" name="AUTOEND" placeholder="Sequence #" type="text" value="<?php echo $singleauto->AUTOEND; ?>">
-      </div>
-    </div>
-  </div>
-
-  <div class="form-group">
-    <div class="col-md-8">
-      <label class="col-md-4 control-label" for="AUTOINC">Increment Value:</label>
-
-      <div class="col-md-8">
-        <input class="form-control input-sm" id="AUTOINC" name="AUTOINC" placeholder="Increment Value" type="text" value="<?php echo $singleauto->AUTOINC; ?>">
-      </div>
-    </div>
-  </div>
-
-
-
-
-  <div class="form-group">
-    <div class="col-md-8">
-      <label class="col-md-4 control-label" for="idno"></label>
-
-      <div class="col-md-8">
-
-        <button class="btn btn-primary btn-sm" name="save" type="submit"><span class="fa fa-save fw-fa"></span> Save</button>
-        <a href="index.php" class="btn btn-default"><span class="glyphicon glyphicon-arrow-left"></span>&nbsp;<strong>Back</strong></a>
-      </div>
-    </div>
-  </div>
-
-
-  </fieldset>
-
-  <div class="form-group">
-    <div class="rows">
-      <div class="col-md-6">
-        <label class="col-md-6 control-label" for="otherperson"></label>
-
+      <div class="row g-3">
         <div class="col-md-6">
-
+          <label class="form-label">Key</label>
+          <input class="form-control" type="text" value="<?php echo htmlspecialchars($singleauto->AUTOKEY); ?>" readonly>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" for="AUTOSTART">Prefix <span class="required">*</span></label>
+          <input class="form-control" id="AUTOSTART" name="AUTOSTART" type="text" value="<?php echo htmlspecialchars($singleauto->AUTOSTART); ?>" required>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" for="AUTOEND">Sequence # <span class="required">*</span></label>
+          <input class="form-control" id="AUTOEND" name="AUTOEND" type="text" value="<?php echo htmlspecialchars($singleauto->AUTOEND); ?>" required>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" for="AUTOINC">Increment Value <span class="required">*</span></label>
+          <input class="form-control" id="AUTOINC" name="AUTOINC" type="text" value="<?php echo htmlspecialchars($singleauto->AUTOINC); ?>" required>
+        </div>
+        <div class="col-md-12">
+          <div class="info-badge">
+            <i class="bi bi-info-circle"></i>
+            <span>Next generated number: <strong><?php echo htmlspecialchars($singleauto->AUTOSTART . $singleauto->AUTOEND); ?></strong></span>
+          </div>
         </div>
       </div>
 
-      <div class="col-md-6" align="right">
-
-
+      <div class="form-actions">
+        <button class="btn btn-primary" name="save" type="submit"><i class="bi bi-check-lg"></i> Save Changes</button>
+        <a href="index.php" class="btn btn-outline-secondary"><i class="bi bi-x-lg"></i> Cancel</a>
       </div>
-
     </div>
   </div>
-
 </form>
-
-
-</div><!--End of container-->

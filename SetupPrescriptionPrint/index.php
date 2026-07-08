@@ -7,7 +7,8 @@ if (!isset($_SESSION['ADMIN_USERID'])) {
 
 $view = (isset($_GET['view']) && $_GET['view'] != '') ? $_GET['view'] : '';
 $header = $view;
-$title = "SP prescription";
+$title = "Prescription Print";
+$breadcrumbLabel = 'Prescription Print Setup';
 switch ($view) {
 	case 'list':
 		$content    = 'list.php';

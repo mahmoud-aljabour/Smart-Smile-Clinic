@@ -22,6 +22,11 @@
   --dc-shadow-lg: 0 10px 40px rgba(15, 23, 42, 0.12);
   --dc-radius: 12px;
   --dc-radius-sm: 8px;
+  --dc-form-section-bg: #eff6ff;
+  --dc-form-section-bg-alt: #ecfdf5;
+  --dc-form-input-bg: #ffffff;
+  --dc-form-shell-bg: linear-gradient(145deg, #f0f9ff 0%, #ffffff 42%, #f0fdfa 100%);
+  --dc-form-shell-border: #dbeafe;
   --bs-primary: var(--dc-primary);
   --bs-primary-rgb: 14, 165, 233;
   --bs-body-bg: var(--dc-bg);
@@ -41,6 +46,11 @@
   --dc-accent-light: #134e4a;
   --dc-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
   --dc-shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.4);
+  --dc-form-section-bg: rgba(14, 165, 233, 0.1);
+  --dc-form-section-bg-alt: rgba(20, 184, 166, 0.1);
+  --dc-form-input-bg: #1e293b;
+  --dc-form-shell-bg: linear-gradient(145deg, rgba(14, 165, 233, 0.12) 0%, #1e293b 42%, rgba(20, 184, 166, 0.1) 100%);
+  --dc-form-shell-border: #334155;
   --bs-body-bg: var(--dc-bg);
   --bs-body-color: var(--dc-text);
   --bs-border-color: var(--dc-border);

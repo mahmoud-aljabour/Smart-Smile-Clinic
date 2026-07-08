@@ -1,29 +1,26 @@
 <?php
-require_once("../include/initialize.php");
 if (!isset($_SESSION['ADMIN_USERID'])) {
-  redirect(web_root . "index.php");
+  redirect(web_root . "login.php");
 }
 
-$presc_id = isset($_GET['id']) ? (int)$_GET['id'] : "";
-if ($presc_id == "") {
-  redirect("index.php");
+$presc_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+if ($presc_id <= 0) {
+  redirect("index.php?view=prescriptions");
 }
- 
 
-$sql = "SELECT pr.*, 
-        CONCAT(p.Fname, ' ', p.Lname) AS patient_name,
+$sql = "SELECT pr.*,
+        CONCAT(p.Fname, ' ', p.Mname, ' ', p.Lname) AS patient_name,
         p.ContactNo AS patient_phone,
         p.Age,
         p.Sex,
         p.F_Address AS address,
-        FullName AS doctor_name
+        u.FullName AS doctor_name
         FROM prescriptions pr
         JOIN tblpatients p ON pr.patient_id = p.PatientID
-        JOIN tblusers u ON pr.user_id = u.UserID
+        LEFT JOIN tblusers u ON pr.user_id = u.UserID
         WHERE pr.id = '{$presc_id}'";
 $mydb->setQuery($sql);
 $prescription = $mydb->loadSingleResult();
-// $prescription->prescription_no
 
 if (!$prescription) {
   message("Prescription not found.", "error");
@@ -31,251 +28,169 @@ if (!$prescription) {
 }
 
 $created_at = date_format(date_create($prescription->created_at), "m/d/Y");
+$prescriptionNo = !empty($prescription->prescription_no) ? $prescription->prescription_no : ('PRESC_' . $prescription->id);
+$doctorName = !empty($prescription->doctor_name) ? $prescription->doctor_name : 'Not assigned';
 
-// Fetch header and footer data from tplprintprescriptions
 $sql = "SELECT * FROM tplprintprescriptions LIMIT 1";
 $mydb->setQuery($sql);
 $print_data = $mydb->loadSingleResult();
-$header1 = htmlspecialchars($print_data ? $print_data->header1 : 'Header 1 Default');
-$header2 = htmlspecialchars($print_data ? $print_data->header2 : 'Header 2 Default');
-$header3 = htmlspecialchars($print_data ? $print_data->header3 : 'Header 3 Default');
-$footer1 = htmlspecialchars($print_data ? $print_data->footer1 : 'Footer 1 Default');
-$footer2 = htmlspecialchars($print_data ? $print_data->footer2 : 'Footer 2 Default');
-$footer3 = htmlspecialchars($print_data ? $print_data->footer3 : 'Footer 3 Default');
+
+$header1 = htmlspecialchars($print_data->header1 ?? 'Smart Smile Clinic');
+$header2 = htmlspecialchars($print_data->header2 ?? '');
+$header3 = htmlspecialchars($print_data->header3 ?? '');
+$footer1 = htmlspecialchars($print_data->footer1 ?? '');
+$footer2 = htmlspecialchars($print_data->footer2 ?? '');
+$footer3 = htmlspecialchars($print_data->footer3 ?? '');
 ?>
 
-<style type="text/css">
-  .table-summary {
-    width: 100%;
-    font-size: 15px;
-    font-weight: bold;
-  }
-
-  .table-summary tr td {
-    border-bottom: 1px solid #ddd;
-    padding: 10px 0px 0px 0px;
-  }
-
-  .right {
-    text-align: right;
-  }
-
-  #loading-client {
-    display: none;
-    /*visibility: hidden;*/
-  }
-
-  .header {
-    display: inline-block;
-  }
-
+<style>
   @media print {
-    @page {
-      size: 8.5in 11in;
-      margin: -30px 0px 1cm 0px;
-    }
-
-    body {
-      margin: 0cm;
-    }
-
-    .no-print {
+    .no-print,
+    .no-print * {
       display: none !important;
     }
-  }
 
-  @media print {
-    @page {
-      size: 8.5in 11in;
-      margin: -30px 0px 1cm 0px;
+    .prescription-view-page {
+      background: #fff !important;
+      border: none !important;
+      box-shadow: none !important;
+      padding: 0 !important;
     }
 
-    body {
-      margin: 0cm;
-      border: 0px;
+    .prescription-view-page::before,
+    .prescription-view-page::after {
+      display: none !important;
     }
 
-    .tables {
-      font-size: 11px;
+    .form-page-card {
+      background: #fff !important;
+      border: 1px solid #ddd !important;
+      box-shadow: none !important;
     }
-
-    .tables tr td {
-      padding: 0px 0px 0px 10px;
-      margin: 0px;
-    }
-
-    thead {
-      display: table-header-group;
-    }
-
-    .page-break {
-      /*page-break-after:  always;*/
-      page-break-before: always;
-      break-before: always;
-    }
-
-    .tables tr:nth-child(even) {
-      background-color: #f2f2f2 !important;
-      -webkit-print-color-adjust: exact;
-    }
-  }
-
-  .tables {
-    font-size: 11px;
-    width: 100%;
-  }
-
-  .tables tr th {
-    padding: 10px;
-    border-bottom: 1px #ddd solid;
-  }
-
-  .tables tbody {
-    border-bottom: 1px #ddd solid;
-  }
-
-  @media screen {
-    .tables tr td {
-      padding: 10px;
-    }
-  }
-
-  .firstline {
-    text-align: center;
-    font-size: 20px;
-    font-weight: bolder;
-    text-transform: uppercase;
-  }
-
-  .secondline {
-    text-align: center;
-    font-size: 12px;
-    font-weight: bolder;
-    text-transform: uppercase;
-  }
-
-  .thirdline {
-    text-align: center;
-    font-size: 12px;
-    font-weight: bolder;
-    text-transform: uppercase;
-  }
-
-  .clearfix:after {
-    content: " ";
-    /* Older browser do not support empty content */
-    visibility: hidden;
-    display: block;
-    height: 0;
-    clear: both;
   }
 </style>
 
-<div class="col-md-12 no-print">
-  <div class="">
-    <button type="button" onclick="window.print()" name="save" class="btn btn-primary"><i class="fa fa-print"></i> PRINT</button>
-    <!-- <a href="export_prescription.php?id=<?php echo $pr->prescription_no; ?>" name="save" class="btn btn-primary"><i class="fa fa-upload"></i> Export to Excel</a> -->
+<div class="page-header-bar no-print">
+  <div>
+    <h1 class="h3 mb-1">Prescription Details</h1>
+    <p class="text-muted small mb-0"><?php echo htmlspecialchars($prescriptionNo); ?></p>
+  </div>
+  <div class="d-flex flex-wrap gap-2">
+    <a href="index.php?view=prescriptions" class="btn btn-outline-secondary">
+      <i class="bi bi-arrow-left"></i> Back to List
+    </a>
+    <?php if ($_SESSION['ADMIN_ROLE'] == 'Administrator' || $_SESSION['ADMIN_ROLE'] == 'admin'): ?>
+      <a href="index.php?view=edit_prescription&presc_id=<?php echo $presc_id; ?>" class="btn btn-outline-primary">
+        <i class="bi bi-pencil"></i> Edit
+      </a>
+    <?php endif; ?>
+    <a href="printprescription.php?id=<?php echo $presc_id; ?>" class="btn btn-outline-primary" target="_blank">
+      <i class="bi bi-box-arrow-up-right"></i> Print Page
+    </a>
+    <button type="button" onclick="window.print()" class="btn btn-primary">
+      <i class="bi bi-printer"></i> Print
+    </button>
   </div>
 </div>
 
-<div id="p">
-  <div class="col-md-12" style="margin-top: 40px">
-    <div class="firstline"><?php echo $header1; ?></div>
-    <div class="secondline"><?php echo $header2; ?></div>
-    <div class="thirdline"><?php echo $header3; ?></div>
-  </div>
-  <hr>
+<div id="prescription-view-area" class="form-add-page prescription-view-page invoice-view-page">
 
-  <style type="text/css">
-    .table-client {
-      width: 100%;
-    }
-
-    .table-client tr td {
-      border-bottom: 1px solid #ddd;
-      padding: 5px 3px 5px 3px;
-    }
-
-    #tablecontiner {
-      width: 100%;
-    }
-
-    #tablecontiner tr td {
-      padding: 0px 5px;
-    }
-  </style>
-
-  <div class="col-md-6 col-sm-6 col-xs-6 pull-left">
-    <table class="table-client">
-      <tr>
-        <td>Patient Name :</td>
-        <td><?php echo isset($prescription->patient_name) ? $prescription->patient_name : "None" ?></td>
-      </tr>
-      <tr>
-        <td>Age :</td>
-        <td><?php echo (int)$prescription->Age; ?> years</td>
-      </tr>
-      <tr>
-        <td>Gender :</td>
-        <td><?php echo htmlspecialchars($prescription->Sex); ?></td>
-      </tr>
-      <tr>
-        <td>Address :</td>
-        <td><?php echo htmlspecialchars($prescription->address); ?></td>
-      </tr>
-      <tr>
-        <td>Phone : #</td>
-        <td><?php echo htmlspecialchars($prescription->patient_phone); ?></td>
-      </tr>
-    </table>
+  <div class="invoice-print-header text-center mb-4">
+    <div class="line-main"><?php echo $header1; ?></div>
+    <div class="line-sub"><?php echo $header2; ?></div>
+    <div class="line-sub"><?php echo $header3; ?></div>
   </div>
 
-  <div class="col-md-6 col-sm-6 col-xs-6 pull-rigt">
-    <table class="table-client">
-      <tr>
-        <td>Prescription ID</td>
-        <td> <?php echo isset($prescription->prescription_no) ? $prescription->prescription_no : "None" ?> </td>
-      </tr>
-      <tr>
-        <td>Issue Date</td>
-        <td><?php echo $created_at; ?></td>
-      </tr>
-      <tr>
-        <td>Doctor</td>
-        <td><?php echo htmlspecialchars($prescription->doctor_name); ?></td>
-      </tr>
-    </table>
+  <div class="row g-4 mb-4">
+    <div class="col-lg-6">
+      <div class="form-page-card h-100">
+        <div class="card-header">
+          <i class="bi bi-person-vcard"></i> Patient
+        </div>
+        <div class="card-body">
+          <div class="patient-info-card">
+            <div class="info-item full-width">
+              <span class="info-label">Patient Name</span>
+              <span class="info-value"><?php echo htmlspecialchars(trim($prescription->patient_name)); ?></span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Age</span>
+              <span class="info-value"><?php echo (int)$prescription->Age; ?> years</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Gender</span>
+              <span class="info-value"><?php echo htmlspecialchars($prescription->Sex); ?></span>
+            </div>
+            <div class="info-item full-width">
+              <span class="info-label">Address</span>
+              <span class="info-value"><?php echo htmlspecialchars($prescription->address); ?></span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Phone</span>
+              <span class="info-value"><?php echo htmlspecialchars($prescription->patient_phone); ?></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="form-page-card h-100">
+        <div class="card-header">
+          <i class="bi bi-file-earmark-medical"></i> Prescription Information
+        </div>
+        <div class="card-body">
+          <div class="patient-info-card">
+            <div class="info-item">
+              <span class="info-label">Prescription ID</span>
+              <span class="info-value"><?php echo htmlspecialchars($prescriptionNo); ?></span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Issue Date</span>
+              <span class="info-value"><?php echo htmlspecialchars($created_at); ?></span>
+            </div>
+            <div class="info-item full-width">
+              <span class="info-label">Doctor</span>
+              <span class="info-value"><?php echo htmlspecialchars($doctorName); ?></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <table class="tables">
-    <thead>
-      <tr>
-        <th width="12%">Medicine Name</th>
-        <th>Dosage</th>
-        <th>Timing</th>
-        <th>Medical Advice</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><?php echo htmlspecialchars($prescription->medicine_name); ?></td>
-        <td><?php echo htmlspecialchars($prescription->dosage); ?></td>
-        <td><?php echo htmlspecialchars($prescription->timing ?: 'Not specified'); ?></td>
-        <td><?php echo nl2br(htmlspecialchars($prescription->medical_advice)); ?></td>
-      </tr>
-    </tbody>
-  </table>
-
-  <br>
-
-  <div class="container">
-    <div style="text-transform: uppercase;text-align: center;font-size: 12px"><?php echo $footer1; ?></div>
-    <div style="text-transform: uppercase;text-align: center;font-size: 12px"><?php echo $footer2; ?></div>
-    <div style="text-transform: uppercase;text-align: center;font-size: 12px"><?php echo $footer3; ?></div>
+  <div class="form-page-card mb-4">
+    <div class="card-header">
+      <i class="bi bi-capsule"></i> Medicine Details
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-modern table-hover table-bordered mb-0">
+          <thead>
+            <tr>
+              <th width="22%">Medicine Name</th>
+              <th width="22%">Dosage</th>
+              <th width="18%">Timing</th>
+              <th>Medical Advice</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><?php echo htmlspecialchars($prescription->medicine_name); ?></td>
+              <td><?php echo htmlspecialchars($prescription->dosage); ?></td>
+              <td><?php echo htmlspecialchars($prescription->timing ?: 'Not specified'); ?></td>
+              <td><?php echo nl2br(htmlspecialchars($prescription->medical_advice ?: '—')); ?></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
 
-  <script>
-    function print_prescription() {
-      window.print();
-    }
-  </script>
+  <div class="invoice-print-footer text-center">
+    <div class="line-sub"><?php echo $footer1; ?></div>
+    <div class="line-sub"><?php echo $footer2; ?></div>
+    <div class="line-sub"><?php echo $footer3; ?></div>
+  </div>
+
+</div>

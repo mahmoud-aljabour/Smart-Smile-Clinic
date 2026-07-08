@@ -1,17 +1,20 @@
 <?php
 require_once("../include/initialize.php");
 if (!isset($_SESSION['ADMIN_USERID'])) {
-	redirect(web_root . "admin/index.php");
+	redirect(web_root . "login.php");
 }
 
-if($_SESSION['ADMIN_ROLE'] != "Administrator")
-{
-	redirect(web_root."index.php");
+if ($_SESSION['ADMIN_ROLE'] != "Administrator") {
+	redirect(web_root . "index.php");
 }
 
 $view = (isset($_GET['view']) && $_GET['view'] != '') ? $_GET['view'] : '';
-$title = "Report";
+$title = "Reports";
 $header = $view;
+$viewLabels = array(
+	'list' => 'Sales Report'
+);
+$breadcrumbLabel = isset($viewLabels[$view]) ? $viewLabels[$view] : 'Sales Report';
 switch ($view) {
 	case 'list':
 		$content    = 'list.php';

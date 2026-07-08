@@ -11,6 +11,14 @@ if ($_SESSION['ADMIN_ROLE'] != "Administrator") {
 $view = (isset($_GET['view']) && $_GET['view'] != '') ? $_GET['view'] : '';
 $title = "Services";
 $header = $view;
+$viewLabels = array(
+	'list' => 'Services',
+	'add' => 'Add Service',
+	'edit' => 'Edit Service',
+	'view' => 'Service Details',
+	'bulk' => 'Bulk Import'
+);
+$breadcrumbLabel = isset($viewLabels[$view]) ? $viewLabels[$view] : ucfirst($view);
 switch ($view) {
 	case 'list':
 		$content    = 'list.php';

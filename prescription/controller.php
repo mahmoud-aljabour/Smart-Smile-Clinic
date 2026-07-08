@@ -65,7 +65,7 @@ function doSavePrescription()
     // 3. توليد الرقم التسلسلي الجديد
     $autonum = new Autonumber();
     $res = $autonum->set_autonumber('PRESCRIPTION');
-    $prescription_no = $res->AUTO ?? 'PRESC_001'; 
+    $prescription_no = ($res && !empty($res->AUTO)) ? $res->AUTO : 'PRESC_001';
     
     // 4. بناء استعلام INSERT
     $sql = "INSERT INTO prescriptions 

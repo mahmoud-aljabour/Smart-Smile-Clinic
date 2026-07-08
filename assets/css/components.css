@@ -225,6 +225,450 @@
   border-color: var(--dc-primary);
 }
 
+/* Form pages */
+.form-add-page {
+  position: relative;
+  background: var(--dc-form-shell-bg);
+  border: 1px solid var(--dc-form-shell-border);
+  border-radius: var(--dc-radius);
+  padding: 1.5rem;
+  box-shadow: var(--dc-shadow-lg);
+  overflow: hidden;
+}
+
+.form-add-page::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background: linear-gradient(90deg, var(--dc-primary) 0%, var(--dc-secondary) 50%, var(--dc-accent) 100%);
+}
+
+.form-add-page::after {
+  content: '';
+  position: absolute;
+  top: -80px;
+  right: -80px;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(14, 165, 233, 0.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.form-add-page .form-page-card {
+  position: relative;
+  z-index: 1;
+}
+
+.form-page-card {
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--dc-border);
+  border-radius: var(--dc-radius);
+  box-shadow: 0 2px 12px rgba(15, 23, 42, 0.06);
+  overflow: hidden;
+  border-left: 4px solid var(--dc-primary);
+  backdrop-filter: blur(6px);
+}
+
+[data-bs-theme="dark"] .form-page-card {
+  background: rgba(30, 41, 59, 0.85);
+}
+
+.form-page-card:nth-of-type(even) {
+  border-left-color: var(--dc-accent);
+}
+
+.form-page-card .card-header {
+  background: linear-gradient(135deg, var(--dc-primary-light) 0%, var(--dc-accent-light) 100%);
+  border-bottom: 1px solid var(--dc-border);
+  padding: 1rem 1.25rem;
+  font-weight: 600;
+  color: var(--dc-primary-dark);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.form-page-card:nth-of-type(even) .card-header {
+  background: linear-gradient(135deg, var(--dc-accent-light) 0%, var(--dc-primary-light) 100%);
+}
+
+[data-bs-theme="dark"] .form-page-card .card-header {
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.2) 0%, rgba(20, 184, 166, 0.15) 100%);
+  color: var(--dc-primary);
+}
+
+[data-bs-theme="dark"] .form-page-card:nth-of-type(even) .card-header {
+  background: linear-gradient(135deg, rgba(20, 184, 166, 0.18) 0%, rgba(14, 165, 233, 0.15) 100%);
+}
+
+.form-page-card .card-body {
+  padding: 1.5rem;
+  background: var(--dc-form-section-bg);
+}
+
+.form-page-card:nth-of-type(even) .card-body {
+  background: var(--dc-form-section-bg-alt);
+}
+
+/* View/detail pages: one unified card background (no body vs card mismatch) */
+.invoice-view-page .form-page-card,
+.prescription-view-page .form-page-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--dc-form-section-bg);
+}
+
+.invoice-view-page .form-page-card .card-body,
+.prescription-view-page .form-page-card .card-body {
+  flex: 1;
+  background: transparent;
+}
+
+.invoice-view-page .row > .col-lg-6:nth-child(2) .form-page-card,
+.prescription-view-page .row > .col-lg-6:nth-child(2) .form-page-card {
+  background: var(--dc-form-section-bg-alt);
+}
+
+.form-page-card.h-100 {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-page-card.h-100 .card-body {
+  flex: 1;
+}
+
+.form-section-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--dc-text-muted);
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--dc-border);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.form-page-card .form-label {
+  font-weight: 500;
+  font-size: 0.875rem;
+  margin-bottom: 0.35rem;
+}
+
+.form-page-card .form-label .required {
+  color: #ef4444;
+}
+
+.form-page-card .form-control,
+.form-page-card .form-select {
+  border-radius: var(--dc-radius-sm);
+  border-color: var(--dc-border);
+  font-size: 0.875rem;
+  background-color: var(--dc-form-input-bg);
+}
+
+.form-page-card .input-group-text {
+  background-color: var(--dc-form-input-bg);
+  border-color: var(--dc-border);
+  color: var(--dc-text-muted);
+}
+
+.form-page-card .form-control:focus,
+.form-page-card .form-select:focus {
+  border-color: var(--dc-primary);
+  box-shadow: 0 0 0 0.2rem rgba(14, 165, 233, 0.15);
+}
+
+.form-page-card .form-control.is-invalid {
+  border-color: #ef4444;
+}
+
+.form-page-card .invalid-feedback {
+  font-size: 0.8rem;
+}
+
+.form-hint {
+  font-size: 0.8rem;
+  color: var(--dc-text-muted);
+  margin-top: 0.35rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.35rem;
+}
+
+.form-hint i {
+  margin-top: 0.1rem;
+  color: var(--dc-primary);
+}
+
+.age-preview {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--dc-accent);
+  margin-top: 0.35rem;
+}
+
+.age-preview.is-invalid-age {
+  color: #ef4444;
+}
+
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding-top: 1rem;
+  margin-top: 0.5rem;
+  border-top: 1px solid var(--dc-border);
+}
+
+.form-actions .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+@keyframes form-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+.form-shake {
+  animation: form-shake 0.4s ease-in-out;
+}
+
+.form-page-card .form-control[readonly],
+.form-page-card .form-control:read-only {
+  background-color: rgba(255, 255, 255, 0.65);
+  color: var(--dc-text-muted);
+  cursor: not-allowed;
+}
+
+[data-bs-theme="dark"] .form-page-card .form-control[readonly],
+[data-bs-theme="dark"] .form-page-card .form-control:read-only {
+  background-color: rgba(15, 23, 42, 0.45);
+}
+
+.info-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--dc-primary-dark);
+  background: var(--dc-primary-light);
+  border-radius: 999px;
+  padding: 0.25rem 0.65rem;
+  margin-top: 0.35rem;
+}
+
+[data-bs-theme="dark"] .info-badge {
+  background: rgba(14, 165, 233, 0.15);
+  color: var(--dc-primary);
+}
+
+.info-badge.is-warning {
+  color: #b45309;
+  background: #fef3c7;
+}
+
+[data-bs-theme="dark"] .info-badge.is-warning {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+}
+
+.tooth-preview {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--dc-accent);
+  margin-top: 0.35rem;
+}
+
+.tooth-preview.is-invalid-tooth {
+  color: #ef4444;
+}
+
+/* Invoice add page */
+#loading-client {
+  display: none;
+  text-align: center;
+  padding: 2rem;
+  background: var(--dc-form-shell-bg);
+  border: 1px solid var(--dc-form-shell-border);
+  border-radius: var(--dc-radius);
+  margin-bottom: 1.5rem;
+}
+
+#loading-client img {
+  max-width: 80px;
+  height: auto;
+  margin-bottom: 0.75rem;
+}
+
+.invoice-service-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--dc-border);
+}
+
+.invoice-service-toolbar .toolbar-field {
+  flex: 1 1 280px;
+}
+
+.invoice-service-toolbar .toolbar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.invoice-service-toolbar .form-label {
+  font-weight: 500;
+  font-size: 0.875rem;
+  margin-bottom: 0.35rem;
+}
+
+.patient-info-card {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem 1rem;
+}
+
+.patient-info-card .info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.patient-info-card .info-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--dc-text-muted);
+}
+
+.patient-info-card .info-value {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--dc-text);
+}
+
+.patient-info-card .info-item.full-width {
+  grid-column: 1 / -1;
+}
+
+.patient-close-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #ef4444;
+  cursor: pointer;
+  margin-bottom: 0.75rem;
+  border: none;
+  background: transparent;
+  padding: 0;
+}
+
+.patient-close-btn:hover {
+  color: #dc2626;
+}
+
+.patient-add-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-top: 0.5rem;
+  text-decoration: none;
+}
+
+.invoice-total-box {
+  background: linear-gradient(135deg, var(--dc-primary-light) 0%, var(--dc-accent-light) 100%);
+  border: 1px solid var(--dc-border);
+  border-radius: var(--dc-radius-sm);
+  padding: 1rem 1.25rem;
+  margin-top: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+[data-bs-theme="dark"] .invoice-total-box {
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.15) 0%, rgba(20, 184, 166, 0.12) 100%);
+}
+
+.invoice-total-box .total-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--dc-text-muted);
+}
+
+.invoice-total-box .total-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--dc-primary-dark);
+  line-height: 1;
+}
+
+[data-bs-theme="dark"] .invoice-total-box .total-value {
+  color: var(--dc-primary);
+}
+
+#loadcart .table-modern {
+  margin-bottom: 0;
+}
+
+.report-meta .h5 {
+  font-weight: 600;
+  color: var(--dc-text);
+}
+
+.report-print-area .card-body {
+  padding: 1.5rem;
+}
+
+.invoice-view-page .invoice-print-footer {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--dc-border);
+}
+
+.prescription-view-page .invoice-print-header .line-sub:empty,
+.prescription-view-page .invoice-print-footer .line-sub:empty {
+  display: none;
+}
+
+@media print {
+  .invoice-view-page .form-page-card .card-header,
+  .prescription-view-page .form-page-card .card-header {
+    background: #f8fafc !important;
+    color: #000 !important;
+  }
+}
+
 /* Legacy box compatibility */
 .box, .box-body {
   background: transparent;

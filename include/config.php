@@ -6,7 +6,7 @@ defined('database_name') ? null : define("database_name", "db-dental-07-10");
 // db-dentalclinic
 
 // $web_root =  "https://mcguyverja.com/invoice/"; 
-$web_root = "http://localhost:8080/DentalClinic/";
+$web_root = "http://localhost/DentalClinic/";
 
 
 define('web_root', $web_root);

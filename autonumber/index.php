@@ -1,32 +1,34 @@
 <?php
 require_once("../include/initialize.php");
- 
-	 if (!isset($_SESSION['ADMIN_USERID'])){
-      redirect(web_root."admin/index.php");
-     }
+
+if (!isset($_SESSION['ADMIN_USERID'])) {
+  redirect(web_root . "login.php");
+}
 
 $view = (isset($_GET['view']) && $_GET['view'] != '') ? $_GET['view'] : '';
-$header=$view;
-$title="Autonumber";
+$header = $view;
+$title = "Autonumbers";
+$viewLabels = array(
+  'list' => 'Autonumbers',
+  'add' => 'Add Autonumber',
+  'edit' => 'Edit Autonumber'
+);
+$breadcrumbLabel = isset($viewLabels[$view]) ? $viewLabels[$view] : 'Autonumbers';
+
 switch ($view) {
-	case 'list' :
-		$content    = 'list.php';		
-		break;
-
-	case 'add' :
-		$content    = 'add.php';		
-		break;
-
-	case 'edit' :
-		$content    = 'edit.php';		
-		break;
-    case 'view' :
-		$content    = 'view.php';		
-		break;
-
-	default :
-		$content    = 'list.php';		
+  case 'list':
+    $content = 'list.php';
+    break;
+  case 'add':
+    $content = 'add.php';
+    break;
+  case 'edit':
+    $content = 'edit.php';
+    break;
+  case 'view':
+    $content = 'view.php';
+    break;
+  default:
+    $content = 'list.php';
 }
-require_once ("../theme/templates.php");
-?>
-  
+require_once("../theme/templates.php");

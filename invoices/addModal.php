@@ -2,9 +2,8 @@
    <div class="modal-dialog">
      <div class="modal-content">
        <div class="modal-header">
-         <button class="close" data-dismiss="modal" type="button">x</button>
-
-         <h4 class="modal-title" id="myModalLabel">Add New Client</h4>
+         <h5 class="modal-title" id="myModalLabel">Add New Patient</h5>
+         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
          <div id="successmsg"></div>
        </div>
 
@@ -90,8 +89,10 @@
          </div>
 
          <div class="modal-footer">
-           <button class="btn btn-default" data-dismiss="modal" type="button">Close</button> <button class="btn btn-primary"
-             name="save" type="submit">Save</button>
+           <button class="btn btn-outline-secondary" data-bs-dismiss="modal" type="button">Close</button>
+           <button class="btn btn-primary" name="save" type="submit">
+             <i class="bi bi-check-lg"></i> Save
+           </button>
          </div>
        </form>
      </div><!-- /.modal-content-->

@@ -74,13 +74,14 @@ if (isset($_POST['deleteCart'])) {
 
 ?>
 
-<table class="table table-bordered">
+<table class="table table-modern table-hover table-bordered">
 	<thead>
-		<th width="5%"></th>
-		<th width="12%">Tooth Number</th>
-		<th>Services</th>
-		<th width="10%">Price</th>
-		<!-- <th width="15%">Line Total</th>  -->
+		<tr>
+			<th width="5%"></th>
+			<th width="12%">Tooth Number</th>
+			<th>Services</th>
+			<th width="12%" class="text-end">Price</th>
+		</tr>
 	</thead>
 	<tbody>
 		<?php
@@ -96,7 +97,7 @@ if (isset($_POST['deleteCart'])) {
 		foreach ($cur_inv as $row) {
 			# code... 
 			echo '<tr>';
-			echo '<td><a class="delCart btn btn-xs btn-danger fa fa-trash" title="remove" style="text-decoration:none;" href="#" data-id="' . $row->SKU . '"></a></td>';
+			echo '<td><a class="delCart btn btn-sm btn-outline-danger" title="Remove" href="#" data-id="' . $row->SKU . '"><i class="bi bi-trash"></i></a></td>';
 			echo '<td>' . $row->ToothNumber . '</td>';
 			// echo '<td><input type="number" name="qty" id="qty'.$row->SKU.'" min="1" class="form-control input-cart" autocomplete="off" value="'.$row->QTY.'" data-id="'.$row->SKU.'"></td>'; 
 			echo '<td>' . $row->Services . '</td>';
@@ -106,10 +107,10 @@ if (isset($_POST['deleteCart'])) {
 
 				// echo '<td>'.$setDefault->default_currency(). ' '.number_format($row->Price,2).' <a href="#" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#exampleModalLong'.$row->SKU.'">Change Price</a></td>'; 
 
-				echo '<td>' . $setDefault->default_currency() . ' ' . number_format($row->Price, 2) . ' </td>';
+				echo '<td class="text-end">' . $setDefault->default_currency() . ' ' . number_format($row->Price, 2) . '</td>';
 			} else {
 
-				echo '<td>' . $setDefault->default_currency() . ' ' . number_format($row->Price, 2) . '</td>';
+				echo '<td class="text-end">' . $setDefault->default_currency() . ' ' . number_format($row->Price, 2) . '</td>';
 			}
 
 			// change price modal
@@ -142,19 +143,9 @@ foreach ($inv as $result) {
 
 ?>
 
-<div class="row">
-	<div class="table-responsive">
-		<div class="col-md-6 pull-right">
-			<table class="table-summary" style="font-size: 15px">
-
-				<tr>
-					<td id="summary-name" width="18%">Total</td>
-					<td class="right"><?php echo $setDefault->default_currency(); ?> <span style="color: red;font-size:25px;"><?php echo number_format($totalamount, 2); ?> </span> </td>
-				</tr>
-			</table>
-		</div>
-	</div>
-</div>
+<div class="invoice-total-box">
+	<span class="total-label">Invoice Total</span>
+	<span class="total-value"><?php echo $setDefault->default_currency(); ?> <?php echo number_format($totalamount, 2); ?></span>
 </div>
 
 

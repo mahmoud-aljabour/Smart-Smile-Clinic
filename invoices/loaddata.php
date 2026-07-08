@@ -1,13 +1,12 @@
 <?php
 require_once("../include/initialize.php");
-//checkAdmin();
 if (!isset($_SESSION['ADMIN_USERID'])) {
   redirect(web_root . "login.php");
 }
 
 if (isset($_POST['ClosedClientSession'])) {
   unset($_SESSION['Patients']);
-  unset($_SESSION['PatientAgeGroupID']); // حذف عند الإغلاق
+  unset($_SESSION['PatientAgeGroupID']);
 
   if (isset($_POST['invno'])) {
     $invno = $_POST['invno'];
@@ -17,7 +16,6 @@ if (isset($_POST['ClosedClientSession'])) {
   }
 }
 
-// تحديث Patients وAgeGroupID فقط عند اختيار مريض جديد
 if (!isset($_SESSION['Patients'])) {
   $_SESSION['Patients'] = isset($_POST['Patients']) ? $_POST['Patients'] : "";
 } elseif (isset($_POST['Patients']) && $_POST['Patients'] !== $_SESSION['Patients']) {
@@ -40,21 +38,23 @@ if (!isset($_SESSION['Patients'])) {
 
 if ($_SESSION['Patients'] == "NONE" || $_SESSION['Patients'] == "") {
 ?>
-  <label>Patient : </label>
-  <select class="select2 form-control" id="Patients" name="Patients">
-    <option value="None">Select</option>
+  <label class="form-label" for="Patients">Select Patient</label>
+  <select class="select2 form-select" id="Patients" name="Patients">
+    <option value="None">Choose a patient...</option>
     <?php
     $sql = "SELECT * FROM tblpatients";
     $mydb->setQuery($sql);
     $res = $mydb->loadResultList();
     foreach ($res as $row) {
-      $fullName = $row->Fname . ' ' . $row->Mname . ' ' . $row->Lname;
+      $fullName = trim($row->Fname . ' ' . $row->Mname . ' ' . $row->Lname);
       $selected = ($_SESSION['Patients'] == $fullName) ? 'selected' : '';
-      echo '<option value="' . $fullName . '" ' . $selected . '>' . $fullName . '</option>';
+      echo '<option value="' . htmlspecialchars($fullName) . '" ' . $selected . '>' . htmlspecialchars($fullName) . '</option>';
     }
     ?>
   </select>
-  <a id="client_modal" data-target="#addClientModal" data-toggle="modal" href="#">Add New</a>
+  <a id="client_modal" class="patient-add-link" data-bs-target="#addClientModal" data-bs-toggle="modal" href="#">
+    <i class="bi bi-person-plus"></i> Add New Patient
+  </a>
 <?php } else {
   $Patients = $_SESSION['Patients'];
   if (isset($_POST['invno'])) {
@@ -70,23 +70,34 @@ if ($_SESSION['Patients'] == "NONE" || $_SESSION['Patients'] == "") {
   $maxrow = $mydb->num_rows($cur);
   $res = $mydb->loadSingleResult();
 ?>
-  <style type="text/css">
-    .table-client { width: 100%; }
-    .table-client tr td { border-bottom: 1px solid #ddd; padding: 10px 0px 0px 0px; }
-  </style>
-  <div id="closeClient" style="text-align: right;cursor: pointer;color: red;font-weight: bolder;">x</div>
+  <button type="button" id="closeClient" class="patient-close-btn" title="Remove patient">
+    <i class="bi bi-x-circle"></i> Remove patient
+  </button>
   <?php if ($maxrow > 0) { ?>
-    <table class="table-client">
-      <tr><td>Patient Name</td><td><?php echo $res->Fname . ' ' . $res->Mname . ' ' . $res->Lname; ?></td></tr>
-      <tr><td>Sex</td><td><?php echo $res->Sex; ?></td></tr>
-      <tr><td>Age</td><td><?php echo $res->Age; ?></td></tr>
-      <tr><td>Address</td><td><?php echo $res->F_Address; ?></td></tr>
-      <tr><td>Phone #</td><td><?php echo $res->ContactNo; ?></td></tr>
-    </table>
+    <div class="patient-info-card">
+      <div class="info-item full-width">
+        <span class="info-label">Patient Name</span>
+        <span class="info-value"><?php echo htmlspecialchars(trim($res->Fname . ' ' . $res->Mname . ' ' . $res->Lname)); ?></span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">Sex</span>
+        <span class="info-value"><?php echo htmlspecialchars($res->Sex); ?></span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">Age</span>
+        <span class="info-value"><?php echo htmlspecialchars($res->Age); ?></span>
+      </div>
+      <div class="info-item full-width">
+        <span class="info-label">Address</span>
+        <span class="info-value"><?php echo htmlspecialchars($res->F_Address); ?></span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">Phone</span>
+        <span class="info-value"><?php echo htmlspecialchars($res->ContactNo); ?></span>
+      </div>
+    </div>
   <?php } ?>
 <?php } ?>
-<script type="text/javascript" src="<?php echo web_root; ?>plugins/jQuery/jQuery-2.1.4.min.js"></script>
-<script type="text/javascript" src="<?php echo web_root; ?>plugins/select2/select2.full.min.js"></script>
 <script type="text/javascript">
   $("#Patients").on("change", function() {
     var Patients = $(this).val();
@@ -111,4 +122,8 @@ if ($_SESSION['Patients'] == "NONE" || $_SESSION['Patients'] == "") {
 
   $.clearFormFields = function() { $('#my_form').find('input[type=text], input[type=password], input[type=number], input[type=email], textarea').val(''); $("#successmsg").html(""); };
   $('#client_modal').on('click', function() { $.clearFormFields(); });
+
+  if ($.fn.select2 && $("#Patients").length) {
+    $("#Patients").select2({ width: '100%' });
+  }
 </script>

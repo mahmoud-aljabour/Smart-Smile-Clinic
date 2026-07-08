@@ -9,6 +9,13 @@ if (!isset($_SESSION['ADMIN_USERID'])) {
 $view = (isset($_GET['view']) && $_GET['view'] != '') ? $_GET['view'] : '';
 $title = "Invoices";
 $header = $view;
+$viewLabels = array(
+	'list' => 'Invoices',
+	'add' => 'Create Invoice',
+	'edit' => 'Edit Invoice',
+	'view' => 'Invoice Details'
+);
+$breadcrumbLabel = isset($viewLabels[$view]) ? $viewLabels[$view] : ucfirst($view);
 switch ($view) {
 	case 'list':
 		$content    = 'list.php';

@@ -2,199 +2,97 @@
 if (!isset($_SESSION['ADMIN_USERID'])) {
   redirect(web_root . "login.php");
 }
-
-$msg = ''; // Initialize message variable
-
-if (isset($_POST['save'])) {
-  // Validate birth date before submitting to controller
-  $birthDate = $_POST['BirthDate']; // Format: m/d/Y from datepicker
-  $today = date('Y-m-d'); // Current date: 2025-10-03
-
-  // Convert to Y-m-d for calculation
-  $birthDateFormatted = DateTime::createFromFormat('m/d/Y', $birthDate);
-  if ($birthDateFormatted) {
-    $birthDateYmd = $birthDateFormatted->format('Y-m-d');
-    $currentDate = new DateTime($today);
-    $birthObj = new DateTime($birthDateYmd);
-    $age = $birthObj->diff($currentDate)->y; // Age in full years
-
-    if ($age < 1) {
-      $msg = "Cannot add a patient under 1 year old. Current age: " . $age . " year(s). Please enter an earlier birth date.";
-      // Stop and do not submit to controller
-    } else {
-      // Valid age - allow submission to controller (no redirect, let form post)
-      // You can add more processing here if needed
-    }
-  } else {
-    $msg = "Invalid birth date format. Please use mm/dd/yyyy.";
-  }
-}
 ?>
 
-<style>
-   
-  .help-block {
-    color: #d9534f;
-    font-style: italic;
-    margin-top: 5px;
-    display: flex;
-    align-items: center;
-    font-size: 13px;
-  }
-
-  .help-block i {
-    margin-right: 5px;
-    color: #f0ad4e;
-  }
-
-  .alert {
-    border-radius: 8px;
-    padding: 15px;
-    margin-bottom: 20px;
-  }
-
-  .alert i {
-    margin-right: 10px;
-  }
-
-  .shake {
-    animation: shake 0.5s ease-in-out;
-  }
-
-  @keyframes shake {
-
-    0%,
-    100% {
-      transform: translateX(0);
-    }
-
-    25% {
-      transform: translateX(-5px);
-    }
-
-    75% {
-      transform: translateX(5px);
-    }
-  }
-</style>
-
-<form class="form-horizontal span6" action="controller.php?action=add" method="POST" autocomplete="off" id="patientForm" onsubmit="return validateForm()">
-
-  <div class="row">
-    <div class="col-lg-12">
-      <h1 class="page-header">Add New</h1>
-    </div>
-    <!-- /.col-lg-12 -->
+<div class="page-header-bar">
+  <div>
+    <h1 class="h3 mb-1">Add Patient</h1>
+    <p class="text-muted small mb-0">Register a new patient in the clinic system</p>
   </div>
+  <a href="index.php" class="btn btn-outline-secondary">
+    <i class="bi bi-arrow-left"></i> Back to List
+  </a>
+</div>
 
-  <?php if ($msg != '') { ?>
-    <div class="alert alert-danger">
-      <i class="fa fa-exclamation-triangle"></i>
-      <?php echo $msg; ?>
+<form action="controller.php?action=add" method="POST" autocomplete="off" id="patientForm" class="form-add-page" novalidate>
+
+  <div class="form-page-card mb-4">
+    <div class="card-header">
+      <i class="bi bi-person-vcard"></i> Personal Information
     </div>
-  <?php } ?>
-
-  <div class="form-group">
-    <div class="col-md-8">
-      <label class="col-md-4 control-label" for="Fname">First Name:</label>
-
-      <div class="col-md-8">
-        <input class="form-control input-sm" id="Fname" name="Fname" placeholder="First Name" type="text" value="" autocomplete="off" required>
-      </div>
-    </div>
-  </div>
-
-  <div class="form-group">
-    <div class="col-md-8">
-      <label class="col-md-4 control-label" for="Mname">Middle Name:</label>
-
-      <div class="col-md-8">
-        <input class="form-control input-sm" id="Mname" name="Mname" placeholder="Middle Name" type="text" value="" autocomplete="off" required>
-      </div>
-    </div>
-  </div>
-
-  <div class="form-group">
-    <div class="col-md-8">
-      <label class="col-md-4 control-label" for="Lname">Last Name:</label>
-
-      <div class="col-md-8">
-        <input class="form-control input-sm" id="Lname" name="Lname" placeholder="Last Name" type="text" value="" autocomplete="off" required>
-      </div>
-    </div>
-  </div>
-
-  <!-- required -->
-
-  <div class="form-group">
-    <div class="col-md-8">
-      <label class="col-md-4 control-label" for="F_Address">Address:</label>
-      <div class="col-md-8">
-        <textarea class="form-control input-sm" id="F_Address" name="F_Address" placeholder="Address 1" type="text" value="" onkeyup="javascript:capitalize(this.id, this.value);" autocomplete="off" required></textarea>
-
-      </div>
-    </div>
-  </div>
-
-  <div class="form-group">
-    <div class="col-md-8">
-      <label class="col-md-4 control-label" for="Sex">Sex:</label>
-
-      <div class="col-md-8">
-        <select class="form-control input-sm" id="Sex" name="Sex">
-          <option value="">Select Sex</option>
-          <option>Male</option>
-          <option>Female</option>
-        </select>
-      </div>
-    </div>
-  </div>
-
-  <div class="form-group">
-    <div class="col-md-8">
-      <label class="col-md-4 control-label" for="BirthDate">Date of Birth:</label>
-
-      <div class="col-md-8">
-        <div class="input-group date" data-provide="datepicker" data-date-format="mm/dd/yyyy">
-          <input type="text" class="form-control input-sm date_picker date_inv" id="BirthDate" name="BirthDate" placeholder="mm/dd/yyyy" autocomplete="off" required value="<?php echo date_format(date_create(date('Y-m-d')), 'm/d/Y'); ?>" />
-          <span class="input-group-addon"><i class="fa fa-th"></i></span>
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label" for="Fname">First Name <span class="required">*</span></label>
+          <input class="form-control" id="Fname" name="Fname" placeholder="e.g. Ahmed" type="text" autocomplete="off" required>
+          <div class="invalid-feedback">First name is required.</div>
         </div>
-        <div class="help-block" data-toggle="tooltip" title="Enter a birth date that makes the patient at least 1 year old. Example: For today (October 03, 2025), use October 03, 2024 or earlier.">
-          <i class="fa fa-info-circle"></i>
-          Note: Birth date must be at least one year before today (age 1+).
+        <div class="col-md-4">
+          <label class="form-label" for="Mname">Middle Name</label>
+          <input class="form-control" id="Mname" name="Mname" placeholder="Optional" type="text" autocomplete="off">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label" for="Lname">Last Name <span class="required">*</span></label>
+          <input class="form-control" id="Lname" name="Lname" placeholder="e.g. Hassan" type="text" autocomplete="off" required>
+          <div class="invalid-feedback">Last name is required.</div>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label" for="Sex">Sex <span class="required">*</span></label>
+          <select class="form-select" id="Sex" name="Sex" required>
+            <option value="">Select sex</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+          </select>
+          <div class="invalid-feedback">Please select sex.</div>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label" for="BirthDate">Date of Birth <span class="required">*</span></label>
+          <div class="input-group date" data-provide="datepicker" data-date-format="mm/dd/yyyy">
+            <span class="input-group-text"><i class="bi bi-calendar3"></i></span>
+            <input type="text" class="form-control date_picker" id="BirthDate" name="BirthDate" placeholder="mm/dd/yyyy" autocomplete="off" required>
+          </div>
+          <div class="invalid-feedback">Valid birth date is required (patient must be at least 1 year old).</div>
+          <div class="form-hint">
+            <i class="bi bi-info-circle"></i>
+            <span>Patient must be at least 1 year old.</span>
+          </div>
+          <div class="age-preview d-none" id="agePreview">
+            <i class="bi bi-hourglass-split"></i>
+            <span id="agePreviewText"></span>
+          </div>
+        </div>
+        <div class="col-md-12">
+          <label class="form-label" for="F_Address">Address <span class="required">*</span></label>
+          <textarea class="form-control" id="F_Address" name="F_Address" placeholder="Street, city, area..." rows="2" autocomplete="off" required></textarea>
+          <div class="invalid-feedback">Address is required.</div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Commented Age field - not used -->
-
-  <div class="form-group">
-    <div class="col-md-8">
-      <label class="col-md-4 control-label" for="ContactNo">Contact No.:</label>
-
-      <div class="col-md-8">
-        <input
-          class="form-control input-sm"
-          id="ContactNo"
-          name="ContactNo"
-          placeholder="Contact No."
-          type="number"
-          oninput="javascript: if (this.value.length > 10) this.value = this.value.slice(0, 10);"
-          value=""
-          autocomplete="none"
-          required>
-      </div>
+  <div class="form-page-card">
+    <div class="card-header">
+      <i class="bi bi-telephone"></i> Contact Information
     </div>
-  </div>
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label" for="ContactNo">Contact Number <span class="required">*</span></label>
+          <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-phone"></i></span>
+            <input class="form-control" id="ContactNo" name="ContactNo" placeholder="10-digit number" type="tel" inputmode="numeric" maxlength="10" pattern="[0-9]{10}" autocomplete="off" required>
+          </div>
+          <div class="invalid-feedback">Contact number must be exactly 10 digits.</div>
+        </div>
+      </div>
 
-  <div class="form-group">
-    <div class="col-md-8">
-      <label class="col-md-4 control-label" for="idno"></label>
-
-      <div class="col-md-8">
-        <button class="btn btn-primary btn-md" name="save" type="submit"><span class="fa fa-save fw-fa"></span> Save</button>
-        <a href="index.php" class="btn btn-default"><span class="glyphicon glyphicon-arrow-left"></span>&nbsp;<strong>Back</strong></a>
+      <div class="form-actions">
+        <button class="btn btn-primary" name="save" type="submit">
+          <i class="bi bi-check-lg"></i> Save Patient
+        </button>
+        <a href="index.php" class="btn btn-outline-secondary">
+          <i class="bi bi-x-lg"></i> Cancel
+        </a>
       </div>
     </div>
   </div>
@@ -202,76 +100,169 @@ if (isset($_POST['save'])) {
 </form>
 
 <script>
-  function validateForm() {
-    var birthDate = document.getElementById('BirthDate').value; // m/d/Y format
-    var contactNo = document.getElementById('ContactNo').value;
+(function () {
+  var form = document.getElementById('patientForm');
+  var birthInput = document.getElementById('BirthDate');
+  var contactInput = document.getElementById('ContactNo');
+  var agePreview = document.getElementById('agePreview');
+  var agePreviewText = document.getElementById('agePreviewText');
 
-    // Validate Contact No (10 digits)
-    if (contactNo.length !== 10) {
-      alert('Contact number must be exactly 10 digits.');
-      document.getElementById('ContactNo').classList.add('shake');
-      setTimeout(() => document.getElementById('ContactNo').classList.remove('shake'), 500);
-      return false;
-    }
-
-    // Validate Birth Date (age >=1)
-    if (!birthDate) {
-      alert('Birth date is required.');
-      return false;
-    }
-
-    // Parse birth date (m/d/Y)
-    var parts = birthDate.split('/');
-    if (parts.length !== 3) {
-      alert('Invalid birth date format. Use mm/dd/yyyy.');
-      return false;
-    }
-
-    var birthYear = parseInt(parts[2]);
-    var birthMonth = parseInt(parts[0]);
-    var birthDay = parseInt(parts[1]);
-    var today = new Date();
-    var birth = new Date(birthYear, birthMonth - 1, birthDay);
-
-    var age = today.getFullYear() - birth.getFullYear();
-    var monthDiff = today.getMonth() - birth.getMonth();
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-      age--;
-    }
-
-    if (age < 1) {
-      alert('Cannot add a patient under 1 year old. Current age: ' + age + ' year(s). Please enter an earlier birth date.');
-      document.getElementById('BirthDate').classList.add('shake');
-      setTimeout(() => document.getElementById('BirthDate').classList.remove('shake'), 500);
-      return false;
-    }
-
-    return true; // Allow submission to controller
+  function capitalizeWords(value) {
+    return value.replace(/\b\w/g, function (ch) { return ch.toUpperCase(); });
   }
 
-  // Initialize tooltips if Bootstrap is loaded
-  $(document).ready(function() {
-    $('[data-toggle="tooltip"]').tooltip();
-  });
-</script>
+  function parseBirthDate(value) {
+    var parts = value.split('/');
+    if (parts.length !== 3) return null;
+    var month = parseInt(parts[0], 10);
+    var day = parseInt(parts[1], 10);
+    var year = parseInt(parts[2], 10);
+    if (!month || !day || !year) return null;
+    var date = new Date(year, month - 1, day);
+    if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) {
+      return null;
+    }
+    return date;
+  }
 
-<!-- Your commented Google Maps script remains the same -->
-<!-- <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>  
-  <script type="text/javascript">
-    var map = null;
-    var directionsDisplay = null;
-    var directionsService = null;
-    function initialize() {
-        
-      var input = document.getElementById('S_Address');
-      var searchBox = new google.maps.places.SearchBox(input); 
+  function calculateAge(birthDate) {
+    var today = new Date();
+    var age = today.getFullYear() - birthDate.getFullYear();
+    var monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  }
 
-       var input = document.getElementById('F_Address');
-      var searchBox = new google.maps.places.SearchBox(input); 
-    } 
-    $(document).ready(function() {
-        initialize();
+  function updateAgePreview() {
+    var birth = parseBirthDate(birthInput.value.trim());
+    if (!birth) {
+      agePreview.classList.add('d-none');
+      return;
+    }
+    var age = calculateAge(birth);
+    agePreview.classList.remove('d-none');
+    if (age < 1) {
+      agePreview.classList.add('is-invalid-age');
+      agePreviewText.textContent = 'Age: ' + age + ' year(s) — must be at least 1 year old';
+    } else {
+      agePreview.classList.remove('is-invalid-age');
+      agePreviewText.textContent = 'Calculated age: ' + age + ' year(s)';
+    }
+  }
+
+  function setFieldState(field, isValid, message) {
+    field.classList.toggle('is-invalid', !isValid);
+    var feedback = field.closest('.col-md-4, .col-md-6, .col-md-12')?.querySelector('.invalid-feedback');
+    if (feedback && message) {
+      feedback.textContent = message;
+    }
+  }
+
+  function validateBirthDate() {
+    var value = birthInput.value.trim();
+    if (!value) {
+      setFieldState(birthInput, false, 'Birth date is required.');
+      return false;
+    }
+    var birth = parseBirthDate(value);
+    if (!birth) {
+      setFieldState(birthInput, false, 'Use format mm/dd/yyyy.');
+      return false;
+    }
+    var age = calculateAge(birth);
+    if (age < 1) {
+      setFieldState(birthInput, false, 'Patient must be at least 1 year old.');
+      return false;
+    }
+    setFieldState(birthInput, true);
+    return true;
+  }
+
+  function validateContact() {
+    var value = contactInput.value.replace(/\D/g, '');
+    contactInput.value = value;
+    if (value.length !== 10) {
+      setFieldState(contactInput, false, 'Contact number must be exactly 10 digits.');
+      return false;
+    }
+    setFieldState(contactInput, true);
+    return true;
+  }
+
+  function shakeField(field) {
+    field.classList.add('form-shake');
+    setTimeout(function () { field.classList.remove('form-shake'); }, 400);
+  }
+
+  ['Fname', 'Lname', 'Mname'].forEach(function (id) {
+    var field = document.getElementById(id);
+    field.addEventListener('blur', function () {
+      field.value = capitalizeWords(field.value.trim());
     });
- 
-  </script>   
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDTanm_xZQi4_RHeCAxerOqXN96NUwrbZU&libraries=places"></script> -->
+  });
+
+  contactInput.addEventListener('input', function () {
+    contactInput.value = contactInput.value.replace(/\D/g, '').slice(0, 10);
+    if (contactInput.classList.contains('is-invalid')) {
+      validateContact();
+    }
+  });
+
+  birthInput.addEventListener('change', function () {
+    updateAgePreview();
+    if (birthInput.classList.contains('is-invalid')) {
+      validateBirthDate();
+    }
+  });
+
+  birthInput.addEventListener('keyup', updateAgePreview);
+
+  form.addEventListener('submit', function (e) {
+    var isValid = true;
+
+    ['Fname', 'Lname', 'Sex', 'F_Address'].forEach(function (id) {
+      var field = document.getElementById(id);
+      var empty = !field.value.trim();
+      field.classList.toggle('is-invalid', empty);
+      if (empty) {
+        isValid = false;
+        shakeField(field);
+      }
+    });
+
+    if (!validateBirthDate()) {
+      isValid = false;
+      shakeField(birthInput);
+    }
+
+    if (!validateContact()) {
+      isValid = false;
+      shakeField(contactInput);
+    }
+
+    if (!isValid) {
+      e.preventDefault();
+      var firstInvalid = form.querySelector('.is-invalid');
+      if (firstInvalid) {
+        firstInvalid.focus();
+        firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+  });
+
+  form.querySelectorAll('.form-control, .form-select').forEach(function (field) {
+    field.addEventListener('input', function () {
+      if (field.classList.contains('is-invalid') && field.value.trim()) {
+        field.classList.remove('is-invalid');
+      }
+    });
+    field.addEventListener('change', function () {
+      if (field.classList.contains('is-invalid') && field.value.trim()) {
+        field.classList.remove('is-invalid');
+      }
+    });
+  });
+})();
+</script>

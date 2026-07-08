@@ -22,9 +22,8 @@ if (!isset($_SESSION['ADMIN_USERID'])) {
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <button class="close" data-dismiss="modal" type="button">x</button>
-
-        <h4 class="modal-title" id="myModalLabel">List of Services</h4>
+        <h5 class="modal-title" id="myModalLabel">List of Services</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         <div id="successmsg"></div>
       </div>
 
@@ -99,8 +98,10 @@ if (!isset($_SESSION['ADMIN_USERID'])) {
       </div>
 
       <div class="modal-footer">
-        <button class="btn btn-default" data-dismiss="modal" type="button">Close</button> <button class="btn btn-primary"
-          name="save" type="submit">Add to Invoice</button>
+        <button class="btn btn-outline-secondary" data-bs-dismiss="modal" type="button">Close</button>
+        <button class="btn btn-primary" name="save" type="submit">
+          <i class="bi bi-plus-circle"></i> Add to Invoice
+        </button>
       </div>
       </form>
     </div><!-- /.modal-content-->

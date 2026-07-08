@@ -7,6 +7,13 @@ if (!isset($_SESSION['ADMIN_USERID'])) {
 $view = (isset($_GET['view']) && $_GET['view'] != '') ? $_GET['view'] : '';
 $title = "Prescriptions";
 $header = $view;
+$viewLabels = array(
+    'prescriptions' => 'Prescriptions',
+    'add_prescription' => 'Add Prescription',
+    'edit_prescription' => 'Edit Prescription',
+    'view' => 'View Prescription'
+);
+$breadcrumbLabel = isset($viewLabels[$view]) ? $viewLabels[$view] : ucfirst(str_replace('_', ' ', $view));
 
 // Check if an ID is provided for viewing a specific prescription
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;

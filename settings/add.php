@@ -3,85 +3,34 @@ if (!isset($_SESSION['ADMIN_USERID'])) {
   redirect(web_root . "login.php");
 }
 ?>
-<form class="form-horizontal span6" action="controller.php?action=add" method="POST" autocomplete="off">
 
-  <div class="row">
-    <div class="col-lg-12">
-      <h1 class="page-header">Add New Supplier</h1>
-    </div>
-    <!-- /.col-lg-12 -->
+<div class="page-header-bar">
+  <div>
+    <h1 class="h3 mb-1">Add Supplier</h1>
+    <p class="text-muted small mb-0">Register a new supplier</p>
   </div>
-  <!-- // ` `SuplierID`, `Suplier`, `SuplierDeal`, `SuplierNotes` -->
-  <div class="form-group">
-    <div class="col-md-8">
-      <label class="col-md-4 control-label" for="Suplier">Supplier:</label>
+  <a href="index.php?view=list" class="btn btn-outline-secondary">
+    <i class="bi bi-arrow-left"></i> Back to List
+  </a>
+</div>
 
-      <div class="col-md-8">
-        <input class="form-control input-sm" id="Suplier" name="Suplier" placeholder="Suplier" type="text" value="" autocomplete="off">
+<form action="controller.php?action=add" method="POST" autocomplete="off" class="form-add-page" novalidate>
+  <div class="form-page-card">
+    <div class="card-header">
+      <i class="bi bi-truck"></i> Supplier Details
+    </div>
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label" for="Suplier">Supplier Name <span class="required">*</span></label>
+          <input class="form-control" id="Suplier" name="Suplier" placeholder="Supplier name" type="text" required>
+          <div class="invalid-feedback">Supplier name is required.</div>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-primary" name="save" type="submit"><i class="bi bi-check-lg"></i> Save</button>
+        <a href="index.php?view=list" class="btn btn-outline-secondary"><i class="bi bi-x-lg"></i> Cancel</a>
       </div>
     </div>
   </div>
-
-  <!--  <div class="form-group">
-                    <div class="col-md-8">
-                      <label class="col-md-4 control-label" for=
-                      "SuplierDeal">Deal:</label>
-
-                      <div class="col-md-8">
-                         <input class="form-control input-sm" id="SuplierDeal" name="SuplierDeal" placeholder=
-                            "Deal" type="text" value="" autocomplete="off">
-                      </div>
-                    </div>
-                  </div>
-
-
-
-
-                  <div class="form-group">
-                    <div class="col-md-8">
-                      <label class="col-md-4 control-label" for=
-                      "SuplierNotes">Notes:</label> 
-                      <div class="col-md-8">
-                        <textarea class="form-control input-sm" id="SuplierNotes" name="SuplierNotes" placeholder=
-                            "Notes" type="text" value="" required  onkeyup="javascript:capitalize(this.id, this.value);" autocomplete="off"></textarea>
-                  
-                      </div>
-                    </div>
-                  </div>  -->
-
-
-
-  <div class="form-group">
-    <div class="col-md-8">
-      <label class="col-md-4 control-label" for="idno"></label>
-
-      <div class="col-md-8">
-        <button class="btn btn-primary btn-xs" name="save" type="submit"><span class="fa fa-save fw-fa"></span> Save</button>
-        <!-- <a href="index.php" class="btn btn-info"><span class="glyphicon glyphicon-arrow-left"></span>&nbsp;<strong>Back</strong></a> -->
-
-      </div>
-    </div>
-  </div>
-
-
 </form>
-
-<script type="text/javascript" src=" https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-<script type="text/javascript">
-  var map = null;
-  var directionsDisplay = null;
-  var directionsService = null;
-
-  function initialize() {
-
-    var input = document.getElementById('S_Address');
-    var searchBox = new google.maps.places.SearchBox(input);
-
-    var input = document.getElementById('F_Address');
-    var searchBox = new google.maps.places.SearchBox(input);
-  }
-  $(document).ready(function() {
-    initialize();
-  });
-</script>
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDTanm_xZQi4_RHeCAxerOqXN96NUwrbZU&libraries=places"> </script>

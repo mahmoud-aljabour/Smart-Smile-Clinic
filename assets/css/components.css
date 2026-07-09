@@ -156,73 +156,488 @@
 }
 
 /* Appointments calendar */
+.appointments-page .page-header-bar {
+  margin-bottom: 1.25rem;
+}
+
+.appointments-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
 .appointments-date-bar {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
-  padding: 0.75rem 1.25rem;
-  background: var(--dc-primary-light);
+  gap: 0.85rem;
+  padding: 0.9rem 1.15rem;
+  background: linear-gradient(135deg, var(--dc-primary-light) 0%, var(--dc-accent-light) 100%);
   border: 1px solid var(--dc-border);
   border-radius: var(--dc-radius);
-  font-weight: 600;
-  color: var(--dc-primary-dark);
-  max-width: 480px;
-  margin: 0 auto 1.5rem;
+  min-width: 260px;
+  flex: 1;
 }
 
 [data-bs-theme="dark"] .appointments-date-bar {
-  background: rgba(14, 165, 233, 0.12);
-  color: var(--dc-primary);
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.16) 0%, rgba(20, 184, 166, 0.12) 100%);
 }
 
 .appointments-date-bar i {
-  font-size: 1.25rem;
+  font-size: 1.5rem;
+  color: var(--dc-primary);
+  flex-shrink: 0;
 }
 
-#calendar {
+.appointments-date-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.appointments-date-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--dc-text-muted);
+}
+
+.appointments-date-value {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--dc-text);
+}
+
+.appointments-date-time {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--dc-primary-dark);
+}
+
+[data-bs-theme="dark"] .appointments-date-time {
+  color: var(--dc-primary);
+}
+
+.appointments-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.85rem 1.25rem;
+  padding: 0.9rem 1.15rem;
   background: var(--dc-surface);
   border: 1px solid var(--dc-border);
   border-radius: var(--dc-radius);
-  padding: 1rem;
 }
 
-.day-name {
+.appointments-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--dc-text-muted);
+}
+
+.appointments-legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.appointments-legend-dot.is-today {
+  background: rgba(14, 165, 233, 0.2);
+  border: 2px solid var(--dc-primary);
+}
+
+.appointments-legend-dot.is-friday {
+  background: #fee2e2;
+  border: 1px solid #fca5a5;
+}
+
+.appointments-legend-dot.is-event {
+  background: linear-gradient(135deg, var(--dc-primary) 0%, var(--dc-secondary) 100%);
+}
+
+.appointments-calendar-card {
+  background: var(--dc-surface);
+  border: 1px solid var(--dc-border);
+  border-radius: var(--dc-radius);
+  box-shadow: var(--dc-shadow);
+  padding: 1rem 1rem 1.25rem;
+  overflow: hidden;
+}
+
+.appointments-calendar-card #calendar {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+}
+
+.appointments-calendar-card .fc-toolbar {
+  margin-bottom: 1rem !important;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.appointments-calendar-card .fc-toolbar h2 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--dc-text);
+}
+
+.appointments-calendar-card .fc-button {
+  background: var(--dc-surface) !important;
+  border: 1px solid var(--dc-border) !important;
+  color: var(--dc-text) !important;
+  text-shadow: none !important;
+  box-shadow: none !important;
+  border-radius: 8px !important;
+  padding: 0.4rem 0.75rem !important;
+  height: auto !important;
+  font-size: 0.82rem !important;
+  font-weight: 600 !important;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.appointments-calendar-card .fc-button:hover,
+.appointments-calendar-card .fc-button.fc-state-hover {
+  background: var(--dc-primary-light) !important;
+  border-color: var(--dc-primary) !important;
+  color: var(--dc-primary-dark) !important;
+}
+
+.appointments-calendar-card .fc-button.fc-state-active,
+.appointments-calendar-card .fc-button.fc-state-down {
+  background: var(--dc-primary) !important;
+  border-color: var(--dc-primary) !important;
+  color: #fff !important;
+}
+
+.appointments-calendar-card .fc-button.fc-state-disabled {
+  opacity: 0.45;
+}
+
+.appointments-calendar-card .fc-button-group .fc-button {
+  margin-left: 0 !important;
+}
+
+.appointments-calendar-card .fc-head-container,
+.appointments-calendar-card .fc-widget-header {
+  background: transparent;
+}
+
+.appointments-calendar-card .fc-day-header {
+  padding: 0.65rem 0.35rem !important;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--dc-text-muted);
+  border-color: var(--dc-border) !important;
+  background: var(--dc-bg);
+}
+
+.appointments-calendar-card .fc-day,
+.appointments-calendar-card .fc-widget-content {
+  border-color: var(--dc-border) !important;
+}
+
+.appointments-calendar-card .fc-day {
+  position: relative;
+  min-height: 6.5rem;
+  background: var(--dc-surface);
+  transition: background 0.15s ease;
+}
+
+.appointments-calendar-card .fc-day:hover {
+  background: rgba(14, 165, 233, 0.04);
+}
+
+.appointments-calendar-card .fc-day-top {
+  padding: 0.35rem 0.45rem 0.15rem !important;
+}
+
+.appointments-calendar-card .fc-day-number {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--dc-text);
+  padding: 0.2rem 0.45rem;
+  border-radius: 999px;
+  line-height: 1.2;
+}
+
+.appointments-calendar-card .fc-today {
+  background: rgba(14, 165, 233, 0.08) !important;
+}
+
+.appointments-calendar-card .fc-today .fc-day-number {
+  background: var(--dc-primary);
+  color: #fff;
+}
+
+.appointments-calendar-card .fc-day.friday-closed,
+.appointments-calendar-card .fc-day-grid .fc-day.friday-closed {
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(254, 226, 226, 0.55),
+    rgba(254, 226, 226, 0.55) 6px,
+    rgba(254, 242, 242, 0.85) 6px,
+    rgba(254, 242, 242, 0.85) 12px
+  ) !important;
+}
+
+[data-bs-theme="dark"] .appointments-calendar-card .fc-day.friday-closed,
+[data-bs-theme="dark"] .appointments-calendar-card .fc-day-grid .fc-day.friday-closed {
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(127, 29, 29, 0.35),
+    rgba(127, 29, 29, 0.35) 6px,
+    rgba(69, 10, 10, 0.2) 6px,
+    rgba(69, 10, 10, 0.2) 12px
+  ) !important;
+}
+
+.appointments-calendar-card .fc-day.friday-closed .fc-day-number,
+.appointments-calendar-card .fc-day.friday-closed .day-name {
+  color: #b91c1c;
+}
+
+[data-bs-theme="dark"] .appointments-calendar-card .fc-day.friday-closed .fc-day-number,
+[data-bs-theme="dark"] .appointments-calendar-card .fc-day.friday-closed .day-name {
+  color: #fca5a5;
+}
+
+.appointments-calendar-card .fc-day.friday-closed .fc-day-number {
+  background: rgba(254, 202, 202, 0.65);
+}
+
+.appointments-calendar-card .fc-day-closed-label {
   position: absolute;
-  bottom: 2px;
-  left: 0;
-  width: 100%;
-  text-align: center;
-  font-size: 9px;
-  font-weight: bold;
-  color: #666;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #b91c1c;
+  background: rgba(255, 255, 255, 0.75);
+  padding: 0.1rem 0.35rem;
+  border-radius: 999px;
   pointer-events: none;
 }
 
-.fc-day.friday .day-name {
-  color: white !important;
+[data-bs-theme="dark"] .appointments-calendar-card .fc-day-closed-label {
+  color: #fecaca;
+  background: rgba(69, 10, 10, 0.55);
 }
 
-.fc-day {
-  position: relative;
+.appointments-calendar-card .day-name {
+  position: absolute;
+  bottom: 4px;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--dc-text-muted);
+  pointer-events: none;
+}
+
+.appointments-calendar-card .fc-event {
+  border: none !important;
+  border-radius: 6px !important;
+  padding: 2px 4px;
+  font-size: 0.74rem !important;
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.12);
+  background: linear-gradient(135deg, var(--dc-primary) 0%, var(--dc-secondary) 100%) !important;
+}
+
+.appointments-calendar-card .fc-event .fc-time {
+  font-weight: 700;
+}
+
+.appointments-calendar-card .fc-event .fc-event-time-label {
+  font-weight: 800;
+  margin-right: 0.15rem;
+}
+
+.appointments-calendar-card .fc-event:hover {
+  filter: brightness(1.05);
+}
+
+.appointments-calendar-card a.fc-more {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--dc-primary);
+}
+
+.appointments-calendar-card .fc-unthemed td.fc-today {
+  background: rgba(14, 165, 233, 0.08);
+}
+
+.appointments-calendar-card .fc-highlight {
+  background: rgba(14, 165, 233, 0.18) !important;
+  opacity: 1 !important;
+}
+
+.appointments-calendar-card .fc-agenda-view .fc-axis,
+.appointments-calendar-card .fc-time-grid .fc-slats td {
+  border-color: var(--dc-border) !important;
+}
+
+.appointments-calendar-card .fc-time-grid .fc-event {
+  border-radius: 8px !important;
+}
+
+.appointments-calendar-card .fc-now-indicator-line {
+  border-color: #ef4444;
+}
+
+@media (max-width: 767.98px) {
+  .appointments-toolbar {
+    flex-direction: column;
+  }
+
+  .appointments-calendar-card {
+    padding: 0.65rem 0.5rem 0.85rem;
+  }
+
+  .appointments-calendar-card .fc-toolbar .fc-left,
+  .appointments-calendar-card .fc-toolbar .fc-right,
+  .appointments-calendar-card .fc-toolbar .fc-center {
+    float: none;
+    width: 100%;
+    text-align: center;
+  }
+
+  .appointments-calendar-card .fc-toolbar .fc-center {
+    order: -1;
+  }
+
+  .appointments-calendar-card .fc-day {
+    min-height: 4.5rem;
+  }
 }
 
 /* DataTables overrides */
-.dataTables_wrapper .dataTables_filter input {
-  border-radius: var(--dc-radius-sm);
+.dataTables_wrapper {
+  font-size: 0.875rem;
+}
+
+.dataTables_wrapper .dt-toolbar {
+  padding: 0.85rem 1rem;
+  margin-bottom: 0.75rem !important;
+  background: var(--dc-form-shell-bg);
   border: 1px solid var(--dc-border);
-  padding: 0.35rem 0.75rem;
+  border-radius: var(--dc-radius-sm);
+}
+
+.dataTables_wrapper .dataTables_length,
+.dataTables_wrapper .dataTables_filter {
+  margin: 0;
+}
+
+.dataTables_wrapper .dataTables_length label,
+.dataTables_wrapper .dataTables_filter label {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--dc-text-muted);
+}
+
+.dataTables_wrapper .dataTables_length select,
+.dataTables_wrapper .dataTables_filter input {
+  display: inline-block;
+  min-height: 2.25rem;
+  font-size: 0.875rem;
+  color: var(--dc-text);
+  background-color: var(--dc-surface);
+  border: 1px solid var(--dc-border);
+  border-radius: var(--dc-radius-sm);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .dataTables_wrapper .dataTables_length select {
+  min-width: 5.5rem;
+  padding: 0.35rem 2rem 0.35rem 0.75rem;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 0.65rem center;
+  background-size: 12px 10px;
+  appearance: none;
+}
+
+.dataTables_wrapper .dataTables_filter input {
+  min-width: 220px;
+  padding: 0.4rem 0.85rem;
+}
+
+.dataTables_wrapper .dataTables_length select:focus,
+.dataTables_wrapper .dataTables_filter input:focus {
+  outline: 0;
+  border-color: var(--dc-primary);
+  box-shadow: 0 0 0 0.2rem rgba(14, 165, 233, 0.15);
+}
+
+.dataTables_wrapper .dataTables_info {
+  padding-top: 0;
+  font-size: 0.85rem;
+  color: var(--dc-text-muted);
+}
+
+.dataTables_wrapper .dataTables_paginate {
+  padding-top: 0;
+}
+
+.dataTables_wrapper .dataTables_paginate .pagination {
+  margin-bottom: 0;
+  gap: 0.25rem;
+}
+
+.dataTables_wrapper .dataTables_paginate .page-link {
   border-radius: var(--dc-radius-sm);
-  border: 1px solid var(--dc-border);
-  padding: 0.25rem 0.5rem;
+  font-size: 0.85rem;
+  padding: 0.35rem 0.7rem;
 }
 
 .page-item.active .page-link {
   background-color: var(--dc-primary);
   border-color: var(--dc-primary);
+}
+
+@media (max-width: 767.98px) {
+  .dataTables_wrapper .dt-toolbar .dataTables_length,
+  .dataTables_wrapper .dt-toolbar .dataTables_filter {
+    width: 100%;
+  }
+
+  .dataTables_wrapper .dataTables_length label,
+  .dataTables_wrapper .dataTables_filter label {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .dataTables_wrapper .dataTables_filter input {
+    width: 100%;
+    min-width: 0;
+  }
 }
 
 /* Form pages */
@@ -641,13 +1056,330 @@
   margin-bottom: 0;
 }
 
-.report-meta .h5 {
+.report-meta .h5,
+.report-meta .report-title {
   font-weight: 600;
   color: var(--dc-text);
 }
 
+.report-print-header,
+.report-print-footer,
+.report-print-summary {
+  display: none;
+}
+
+.sales-report-page .report-print-header .line-main {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--dc-text);
+}
+
+.sales-report-page .report-print-header .line-sub,
+.sales-report-page .report-print-footer .line-sub {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--dc-text-muted);
+}
+
 .report-print-area .card-body {
   padding: 1.5rem;
+}
+
+[data-bs-theme="dark"] .sales-report-page .report-table {
+  --bs-table-bg: var(--dc-surface);
+  --bs-table-color: var(--dc-text);
+  --bs-table-border-color: #475569;
+  --bs-table-hover-bg: rgba(14, 165, 233, 0.14);
+  --bs-table-hover-color: var(--dc-text);
+  --bs-table-striped-bg: rgba(148, 163, 184, 0.06);
+  --bs-table-striped-color: var(--dc-text);
+}
+
+[data-bs-theme="dark"] .sales-report-page .report-table tbody td {
+  background-color: var(--dc-surface);
+  color: var(--dc-text);
+  border-color: #475569;
+}
+
+[data-bs-theme="dark"] .sales-report-page .report-table tbody tr:hover td {
+  background-color: rgba(14, 165, 233, 0.14);
+  color: var(--dc-text);
+}
+
+[data-bs-theme="dark"] .sales-report-page .report-table tbody tr:hover {
+  background-color: transparent;
+}
+
+[data-bs-theme="dark"] .sales-report-page .report-table tfoot .report-total-row td {
+  background: linear-gradient(135deg, #3e2723 0%, #5d4037 100%);
+  color: #ffffff;
+  border-color: #8d6e63;
+  border-top: 2px solid #a1887f !important;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+[data-bs-theme="dark"] .sales-report-page .report-table tfoot .report-total-row td:last-child {
+  color: #ffffff;
+  font-size: 1.1rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+[data-bs-theme="dark"] .sales-report-page .report-screen-total {
+  background: linear-gradient(135deg, #3e2723 0%, #5d4037 100%);
+  border: 2px solid #8d6e63;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+}
+
+[data-bs-theme="dark"] .sales-report-page .report-screen-total .total-label {
+  color: #f5f5f5;
+  font-weight: 700;
+}
+
+[data-bs-theme="dark"] .sales-report-page .report-screen-total .total-value {
+  color: #ffffff;
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+[data-bs-theme="dark"] .sales-report-page .report-title,
+[data-bs-theme="dark"] .sales-report-page .report-meta .text-muted {
+  color: var(--dc-text) !important;
+}
+
+[data-bs-theme="dark"] .sales-report-page .report-generated-on {
+  color: var(--dc-text-muted) !important;
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 12mm 10mm;
+  }
+
+  html,
+  body {
+    background: #fff !important;
+    color: #111 !important;
+    color-scheme: light;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .sidebar,
+  .sidebar-backdrop,
+  .top-navbar,
+  .breadcrumb,
+  .app-footer,
+  #check_msg,
+  .no-print,
+  .no-print * {
+    display: none !important;
+  }
+
+  .main-content {
+    margin-left: 0 !important;
+    width: 100% !important;
+  }
+
+  .page-content,
+  .container-fluid {
+    padding: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .sales-report-page {
+    width: 100%;
+  }
+
+  .sales-report-page .report-print-header,
+  .sales-report-page .report-print-footer {
+    display: block !important;
+    text-align: center;
+  }
+
+  .sales-report-page .report-print-header {
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.85rem;
+    border-bottom: 2px solid #0f766e;
+  }
+
+  .sales-report-page .report-print-header .line-main {
+    font-size: 1.35rem;
+    color: #0f766e;
+    letter-spacing: 0.03em;
+  }
+
+  .sales-report-page .report-print-header .line-sub,
+  .sales-report-page .report-print-footer .line-sub {
+    color: #475569;
+    text-transform: none;
+    font-weight: 500;
+    margin-top: 0.15rem;
+  }
+
+  .sales-report-page .report-print-footer {
+    margin-top: 1.25rem;
+    padding-top: 0.85rem;
+    border-top: 1px solid #cbd5e1;
+    font-size: 0.8rem;
+  }
+
+  .sales-report-page .report-print-area {
+    background: #fff !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  .sales-report-page .report-print-area .card-body {
+    padding: 0 !important;
+  }
+
+  .sales-report-page .report-meta {
+    margin-bottom: 1rem !important;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .sales-report-page .report-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #0f172a;
+    margin-bottom: 0.35rem !important;
+  }
+
+  .sales-report-page .report-generated-on,
+  .sales-report-page .report-meta .info-badge {
+    display: none !important;
+  }
+
+  .sales-report-page .report-print-summary {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    padding: 0.65rem 0.85rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+  }
+
+  .sales-report-page .report-print-summary .summary-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  .sales-report-page .report-print-summary .summary-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #64748b;
+  }
+
+  .sales-report-page .report-print-summary .summary-value {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #0f172a;
+  }
+
+  .sales-report-page .report-table-wrap {
+    overflow: visible !important;
+    border: none !important;
+    border-radius: 0 !important;
+  }
+
+  .sales-report-page .report-table {
+    width: 100%;
+    border-collapse: collapse !important;
+    font-size: 0.78rem;
+    page-break-inside: auto;
+  }
+
+  .sales-report-page .report-table thead {
+    display: table-header-group;
+  }
+
+  .sales-report-page .report-table tfoot {
+    display: table-footer-group;
+  }
+
+  .sales-report-page .report-table tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+
+  .sales-report-page .report-table thead th {
+    background: #0f766e !important;
+    color: #fff !important;
+    border: 1px solid #0d655e !important;
+    padding: 0.5rem 0.6rem !important;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
+
+  .sales-report-page .report-table tbody td {
+    border: 1px solid #cbd5e1 !important;
+    padding: 0.42rem 0.6rem !important;
+    color: #1e293b;
+    vertical-align: middle;
+  }
+
+  .sales-report-page .report-table tbody tr:nth-child(even) {
+    background: #f8fafc !important;
+  }
+
+  .sales-report-page .report-table .col-num {
+    width: 4%;
+    text-align: center;
+  }
+
+  .sales-report-page .report-table .col-service {
+    width: 38%;
+  }
+
+  .sales-report-page .report-table .col-invoice {
+    width: 18%;
+    white-space: nowrap;
+  }
+
+  .sales-report-page .report-table .col-date {
+    width: 16%;
+    white-space: nowrap;
+  }
+
+  .sales-report-page .report-table .col-price {
+    width: 14%;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .sales-report-page .report-table tfoot .report-total-row td {
+    background: #ecfdf5 !important;
+    border: 1px solid #0f766e !important;
+    border-top: 2px solid #0f766e !important;
+    padding: 0.55rem 0.6rem !important;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: #0f172a;
+  }
+
+  .sales-report-page .report-screen-total {
+    display: none !important;
+  }
+
+  .invoice-view-page .form-page-card .card-header,
+  .prescription-view-page .form-page-card .card-header,
+  .patient-view-page .form-page-card .card-header {
+    background: #f8fafc !important;
+    color: #000 !important;
+  }
 }
 
 .invoice-view-page .invoice-print-footer {
@@ -656,17 +1388,535 @@
   border-top: 1px solid var(--dc-border);
 }
 
-.prescription-view-page .invoice-print-header .line-sub:empty,
+.invoice-print-header,
+.invoice-print-footer {
+  display: none;
+}
+
+.invoice-document-page .invoice-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.invoice-document-page .invoice-info-block {
+  background: var(--dc-form-section-bg);
+  border: 1px solid var(--dc-border);
+  border-radius: var(--dc-radius-sm);
+  padding: 1rem 1.15rem;
+}
+
+.invoice-document-page .invoice-block-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--dc-primary-dark);
+  margin: 0 0 0.85rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--dc-border);
+}
+
+[data-bs-theme="dark"] .invoice-document-page .invoice-block-title {
+  color: var(--dc-primary);
+}
+
+.invoice-document-page .invoice-detail-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem 1rem;
+}
+
+.invoice-document-page .invoice-detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.invoice-document-page .invoice-detail-item.full-width {
+  grid-column: 1 / -1;
+}
+
+.invoice-document-page .detail-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--dc-text-muted);
+}
+
+.invoice-document-page .detail-value {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--dc-text);
+}
+
+.invoice-document-page .invoice-doc-head .invoice-doc-type {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--dc-text-muted);
+}
+
+.invoice-document-page .invoice-doc-head .invoice-doc-number {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--dc-text);
+}
+
+@media (max-width: 767.98px) {
+  .invoice-document-page .invoice-info-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+[data-bs-theme="dark"] .invoice-document-page .invoice-doc-table {
+  --bs-table-bg: var(--dc-surface);
+  --bs-table-color: var(--dc-text);
+  --bs-table-border-color: #475569;
+  --bs-table-hover-bg: rgba(14, 165, 233, 0.14);
+  --bs-table-hover-color: var(--dc-text);
+}
+
+[data-bs-theme="dark"] .invoice-document-page .invoice-doc-table tbody td {
+  background-color: var(--dc-surface);
+  color: var(--dc-text);
+  border-color: #475569;
+}
+
+[data-bs-theme="dark"] .invoice-document-page .invoice-doc-table tbody tr:hover td {
+  background-color: rgba(14, 165, 233, 0.14);
+}
+
+[data-bs-theme="dark"] .invoice-document-page .invoice-doc-table tfoot .invoice-total-row td {
+  background: linear-gradient(135deg, #3e2723 0%, #5d4037 100%);
+  color: #ffffff;
+  border-color: #8d6e63;
+  border-top: 2px solid #a1887f !important;
+  font-weight: 700;
+}
+
+[data-bs-theme="dark"] .invoice-document-page .invoice-screen-total {
+  background: linear-gradient(135deg, #3e2723 0%, #5d4037 100%);
+  border: 2px solid #8d6e63;
+}
+
+[data-bs-theme="dark"] .invoice-document-page .invoice-screen-total .total-label {
+  color: #f5f5f5;
+}
+
+[data-bs-theme="dark"] .invoice-document-page .invoice-screen-total .total-value {
+  color: #ffffff;
+}
+
+@media print {
+  .invoice-document-page .invoice-print-header,
+  .invoice-document-page .invoice-print-footer {
+    display: block !important;
+    text-align: center;
+  }
+
+  .invoice-document-page .invoice-print-header {
+    margin-bottom: 1.1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid #0f766e;
+  }
+
+  .invoice-document-page .invoice-print-header .line-doc {
+    font-size: 1.2rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #0f766e;
+    margin-bottom: 0.25rem;
+  }
+
+  .invoice-document-page .invoice-print-header .line-main {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #0f172a;
+  }
+
+  .invoice-document-page .invoice-print-header .line-sub,
+  .invoice-document-page .invoice-print-footer .line-sub {
+    font-size: 0.82rem;
+    color: #475569;
+    font-weight: 500;
+    margin-top: 0.15rem;
+  }
+
+  .invoice-document-page .invoice-print-footer {
+    margin-top: 1.1rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid #cbd5e1;
+  }
+
+  .invoice-document-page .invoice-print-area {
+    background: #fff !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  .invoice-document-page .invoice-print-area .card-body {
+    padding: 0 !important;
+  }
+
+  .invoice-document-page .invoice-doc-head {
+    display: none !important;
+  }
+
+  .invoice-document-page .invoice-info-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.85rem;
+    margin-bottom: 1rem !important;
+  }
+
+  .invoice-document-page .invoice-info-block {
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 4px;
+    padding: 0.7rem 0.85rem;
+    page-break-inside: avoid;
+  }
+
+  .invoice-document-page .invoice-block-title {
+    color: #0f766e !important;
+    font-size: 0.72rem;
+    margin-bottom: 0.55rem;
+    padding-bottom: 0.35rem;
+    border-bottom-color: #cbd5e1;
+  }
+
+  .invoice-document-page .detail-label {
+    color: #64748b;
+    font-size: 0.66rem;
+  }
+
+  .invoice-document-page .detail-value {
+    color: #0f172a;
+    font-size: 0.82rem;
+  }
+
+  .invoice-document-page .invoice-status-badge {
+    background: #dcfce7 !important;
+    color: #166534 !important;
+    border: 1px solid #86efac;
+  }
+
+  .invoice-document-page .invoice-status-badge.text-bg-warning {
+    background: #fef3c7 !important;
+    color: #92400e !important;
+    border: 1px solid #fcd34d;
+  }
+
+  .invoice-document-page .invoice-table-wrap {
+    overflow: visible !important;
+    border-radius: 0 !important;
+  }
+
+  .invoice-document-page .invoice-doc-table {
+    width: 100%;
+    border-collapse: collapse !important;
+    font-size: 0.8rem;
+  }
+
+  .invoice-document-page .invoice-doc-table thead {
+    display: table-header-group;
+  }
+
+  .invoice-document-page .invoice-doc-table tfoot {
+    display: table-footer-group;
+  }
+
+  .invoice-document-page .invoice-doc-table tr {
+    page-break-inside: avoid;
+  }
+
+  .invoice-document-page .invoice-doc-table thead th {
+    background: #0f766e !important;
+    color: #fff !important;
+    border: 1px solid #0d655e !important;
+    padding: 0.5rem 0.65rem !important;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .invoice-document-page .invoice-doc-table tbody td {
+    border: 1px solid #cbd5e1 !important;
+    padding: 0.45rem 0.65rem !important;
+    color: #1e293b;
+    vertical-align: middle;
+  }
+
+  .invoice-document-page .invoice-doc-table tbody tr:nth-child(even) {
+    background: #f8fafc !important;
+  }
+
+  .invoice-document-page .invoice-doc-table .col-tooth {
+    width: 18%;
+    text-align: center;
+  }
+
+  .invoice-document-page .invoice-doc-table .col-price {
+    width: 20%;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .invoice-document-page .invoice-doc-table tfoot .invoice-total-row td {
+    background: #ecfdf5 !important;
+    border: 1px solid #0f766e !important;
+    border-top: 2px solid #0f766e !important;
+    padding: 0.55rem 0.65rem !important;
+    font-weight: 700;
+    color: #0f172a;
+    font-size: 0.88rem;
+  }
+
+  .invoice-document-page .invoice-screen-total {
+    display: none !important;
+  }
+
+  .prescription-document-page .prescription-doc-table .col-medicine {
+    width: 22%;
+  }
+
+  .prescription-document-page .prescription-doc-table .col-dosage {
+    width: 22%;
+  }
+
+  .prescription-document-page .prescription-doc-table .col-timing {
+    width: 18%;
+  }
+
+  .prescription-document-page .prescription-doc-table .col-advice {
+    width: 38%;
+    white-space: normal;
+    line-height: 1.45;
+  }
+}
+
+.prescription-document-page .invoice-print-header .line-sub:empty,
+.prescription-document-page .invoice-print-footer .line-sub:empty,
 .prescription-view-page .invoice-print-footer .line-sub:empty {
   display: none;
 }
 
-@media print {
-  .invoice-view-page .form-page-card .card-header,
-  .prescription-view-page .form-page-card .card-header {
-    background: #f8fafc !important;
-    color: #000 !important;
-  }
+/* Patient dental chart */
+.teeth-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.teeth-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  color: var(--dc-text-muted);
+}
+
+.teeth-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.teeth-dot--treated {
+  background: #ef4444;
+}
+
+.teeth-dot--healthy {
+  background: var(--dc-primary);
+}
+
+.teeth-chart-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.teeth-row-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--dc-text-muted);
+}
+
+.teeth-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.35rem;
+}
+
+.tooth-item {
+  position: relative;
+  width: 52px;
+  height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--dc-radius-sm);
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid var(--dc-border);
+}
+
+.tooth-item .icon-iconfinder_Dental_-_Tooth_-_Dentist_-_Dentistry_01_2185089 {
+  font-size: 2.2rem;
+  line-height: 1;
+}
+
+.tooth-item .tooth-number {
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--dc-primary);
+}
+
+.tooth-item.is-treated {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.35);
+}
+
+.tooth-item.is-treated .tooth-number {
+  color: #ef4444;
+}
+
+[data-bs-theme="dark"] .tooth-item.is-treated .tooth-number {
+  color: #f87171;
+}
+
+/* Invoice service picker modal */
+.service-picker-modal .modal-dialog {
+  max-width: 720px;
+}
+
+.service-picker-modal .modal-header {
+  border-bottom: 1px solid var(--dc-border);
+  padding: 1rem 1.25rem;
+}
+
+.service-picker-modal .modal-title {
+  font-weight: 600;
+  color: var(--dc-text);
+}
+
+.service-picker-modal .modal-body {
+  padding: 1.25rem;
+}
+
+.service-picker-modal .modal-footer {
+  border-top: 1px solid var(--dc-border);
+  padding: 0.85rem 1.25rem;
+}
+
+.service-picker-search .input-group-text {
+  background: var(--dc-surface);
+  border-color: var(--dc-border);
+  color: var(--dc-text-muted);
+}
+
+.service-picker-table-wrap {
+  max-height: 340px;
+  overflow-y: auto;
+  border: 1px solid var(--dc-border);
+  border-radius: var(--dc-radius-sm);
+}
+
+.service-picker-table-wrap .table-modern {
+  margin-bottom: 0;
+}
+
+.service-picker-table-wrap .table-modern thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--dc-surface);
+  box-shadow: inset 0 -1px 0 var(--dc-border);
+}
+
+.service-picker-row td {
+  vertical-align: middle;
+}
+
+.service-picker-row:hover {
+  background: rgba(14, 165, 233, 0.04);
+}
+
+.service-picker-row .form-check-input {
+  cursor: pointer;
+}
+
+.service-picker-empty {
+  padding: 2rem 1rem;
+  text-align: center;
+  color: var(--dc-text-muted);
+  font-size: 0.9rem;
+}
+
+.service-picker-filters {
+  padding: 0.85rem 1rem;
+  background: var(--dc-form-section-bg);
+  border: 1px solid var(--dc-border);
+  border-radius: var(--dc-radius-sm);
+}
+
+.service-picker-row.is-added {
+  opacity: 0.72;
+  background: rgba(34, 197, 94, 0.06);
+}
+
+.service-picker-row.is-added:hover {
+  background: rgba(34, 197, 94, 0.08);
+}
+
+/* Delete confirmation modal */
+.delete-confirm-modal .modal-header {
+  border-bottom: 1px solid var(--dc-border);
+}
+
+.delete-confirm-modal .delete-confirm-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+  font-size: 1.35rem;
+  margin-bottom: 0.75rem;
+}
+
+.delete-confirm-modal .delete-confirm-details {
+  background: var(--dc-form-shell-bg, #f8fafc);
+  border: 1px solid var(--dc-border);
+  border-radius: var(--dc-radius-sm);
+  padding: 0.85rem 1rem;
+  font-size: 0.9rem;
+}
+
+.delete-confirm-modal .delete-confirm-details dt {
+  font-weight: 600;
+  color: var(--dc-text-muted);
+  margin-bottom: 0.15rem;
+}
+
+.delete-confirm-modal .delete-confirm-details dd {
+  margin-bottom: 0.5rem;
+  color: var(--dc-text);
+}
+
+.delete-confirm-modal .delete-confirm-details dd:last-child {
+  margin-bottom: 0;
 }
 
 /* Legacy box compatibility */

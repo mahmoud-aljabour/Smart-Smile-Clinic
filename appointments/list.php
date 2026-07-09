@@ -10,18 +10,50 @@ $todayDate = date("Y-m-d");
 $todayName = date("l");
 ?>
 
-<div class="appointments-date-bar">
-  <i class="bi bi-calendar3"></i>
-  <span>Today: <?php echo $todayName . ' — ' . $todayDate . ' | ' . date('H:i:s'); ?></span>
+<div class="appointments-page">
+  <div class="page-header-bar">
+    <div>
+      <h1 class="h3 mb-1">Appointments Calendar</h1>
+      <p class="text-muted small mb-0">Click a day to schedule, or click an appointment to edit</p>
+    </div>
+  </div>
+
+  <div class="appointments-toolbar">
+    <div class="appointments-date-bar">
+      <i class="bi bi-calendar3"></i>
+      <div class="appointments-date-text">
+        <span class="appointments-date-label">Today</span>
+        <span class="appointments-date-value"><?php echo $todayName . ' — ' . $todayDate; ?></span>
+        <span class="appointments-date-time"><?php echo date('H:i'); ?></span>
+      </div>
+    </div>
+
+    <div class="appointments-legend">
+      <span class="appointments-legend-item">
+        <span class="appointments-legend-dot is-today"></span>
+        Today
+      </span>
+      <span class="appointments-legend-item">
+        <span class="appointments-legend-dot is-friday"></span>
+        Friday (Closed)
+      </span>
+      <span class="appointments-legend-item">
+        <span class="appointments-legend-dot is-event"></span>
+        Appointment
+      </span>
+    </div>
+  </div>
+
+  <div class="appointments-calendar-card">
+    <div id="calendar"></div>
+  </div>
 </div>
 
-<div id="calendar"></div>
-
 <div class="modal fade" id="myModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
-  <div class="modal-dialog">
+  <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="modalTitle">Schedule Appointment</h5>
+        <h5 class="modal-title" id="modalTitle"><i class="bi bi-calendar-plus me-2"></i>Schedule Appointment</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">

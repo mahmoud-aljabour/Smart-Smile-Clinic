@@ -44,19 +44,22 @@ function doInsert()
 		$invno = $_POST['invno'];
 		$id = $_POST['selector'];
 		$key = count($id);
+		$addedSkus = get_invoice_cart_skus($invno);
 
 		for ($i = 0; $i < $key; $i++) {
+			if (isset($addedSkus[$id[$i]])) {
+				continue;
+			}
+
 			$sql = "Select * From tblservices Where SKU='{$id[$i]}'";
 			$mydb->setQuery($sql);
 			$cur = $mydb->executeQuery();
 			$maxrow = $mydb->num_rows($cur);
 
 			if ($maxrow > 0) {
-				# code... 
 				$res = $mydb->loadSingleResult();
-
-				$sku = $res->SKU;
-				Add_Invoice($invno, $sku, "Invoice");
+				Add_Invoice($invno, $res->SKU, "Invoice");
+				$addedSkus[$res->SKU] = true;
 			}
 		}
 

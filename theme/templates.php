@@ -1,4 +1,11 @@
-<?php require_once __DIR__ . '/partials/head.php'; ?>
+<?php
+if (!isset($singleuser) && !empty($_SESSION['ADMIN_USERID'])) {
+  $layoutUser = new User();
+  $singleuser = $layoutUser->single_user((int)$_SESSION['ADMIN_USERID']);
+}
+
+require_once __DIR__ . '/partials/head.php';
+?>
 
 <div class="app-wrapper">
   <?php require_once __DIR__ . '/partials/sidebar.php'; ?>
@@ -37,5 +44,6 @@
   </div>
 </div>
 
+<?php require_once __DIR__ . '/partials/delete-confirm-modal.php'; ?>
 <?php require_once __DIR__ . '/partials/scripts.php'; ?>
 <?php if (!empty($pageScript)) { require_once $pageScript; } ?>

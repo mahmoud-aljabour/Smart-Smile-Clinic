@@ -99,35 +99,3 @@
    </div><!-- /.modal-dialog -->
  </div><!-- /.modal -->
 
-
- <script type="text/javascript" src=" https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
- <script type="text/javascript">
-   $("#my_form").submit(function(event) {
-     event.preventDefault(); //prevent default action 
-     $.ajax({
-       type: "POST",
-       url: "<?php echo web_root; ?>patients/controller.php?action=add&modal=true",
-       data: $('#my_form').serialize(),
-       success: function(data) {
-         // alert(data);
-         $("#successmsg").html(data);
-
-         $.ajax({
-           type: "POST",
-           url: "loaddata.php",
-           dataType: "text", //expect html to be returned           
-           success: function(data) {
-             $('#searchclient').hide();
-             $('#searchclient').fadeIn();
-             $('#searchclient').html(data);
-           }
-         });
-
-
-
-       }
-     });
-
-
-   });
- </script>

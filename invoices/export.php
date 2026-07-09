@@ -3,8 +3,15 @@
 
 $invno = isset($_GET['id']) ? $_GET['id'] : "";
 
+$sql = "SELECT * FROM `tblpayments` WHERE InvoiceNo='{$invno}'";
+$mydb->setQuery($sql);
+$payment = $mydb->loadSingleResult();
+$Patients = $payment ? $payment->Patients : '';
+
+$filename = invoice_file_label($invno, $Patients) . '.xls';
+
 header('Content-Type: application/vnd.ms-excel');
-header('Content-Disposition: attachment; filename=' . Date('Y-m-d') . '-' . $invno . '-Invoice.xls');
+header('Content-Disposition: attachment; filename="' . $filename . '"');
 
 # code...
 
@@ -22,11 +29,6 @@ foreach ($inv as $result) {
   $discountrate = 0;
 }
 
-
-$sql = "SELECT * FROM `tblpayments` WHERE  InvoiceNo='{$invno}'";
-$mydb->setQuery($sql);
-$payment = $mydb->loadSingleResult();
-$Patients = $payment->Patients;
 
 $DateInvoiced = date_format(date_create($payment->InvoiceDate), "m/d/Y");
 $DueDate = date_format(date_create($payment->DateDue), "m/d/Y");

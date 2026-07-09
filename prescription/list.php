@@ -1,114 +1,101 @@
 <?php
-// تأكد من تضمين initialize.php في مكان ما قبل هذا الكود
-// إذا لم يكن موجودًا بالفعل: require_once("../include/initialize.php"); 
-
 if (!isset($_SESSION['ADMIN_USERID'])) {
-    message("Please login as a doctor.", "error");
-    redirect("../index.php");
+  message("Please login to continue.", "error");
+  redirect("../index.php");
 }
 
-// ------------------------------------------------------------------
-// ⭐⭐ تم حذف الكود التالي لأنه لا ينتمي لصفحة العرض ⭐⭐
-// $autonum = new Autonumber();
-// $res = $autonum->set_autonumber('PRESCRIPTION');
-// $PRESCRIPTION = $res->AUTO;
-// ------------------------------------------------------------------
-
 global $mydb;
-// 💡 ملاحظة: يجب أن تتأكد من أن كلاس Autonumber متاح للاستخدام في أي صفحة أخرى تستدعي set_autonumber.
+
+$isAdmin = ($_SESSION['ADMIN_ROLE'] == 'Administrator' || $_SESSION['ADMIN_ROLE'] == 'admin');
+$canCreate = ($_SESSION['ADMIN_ROLE'] == 'Administrator');
 ?>
 
-<style type="text/css">
-    #stretch a>img {
-        width: 100%;
-    }
-</style>
-
-<div class="row">
-    <div class="col-lg-12">
-        <?php if ($_SESSION['ADMIN_ROLE'] == "Administrator") { ?>
-            <h1 class="page-header">
-                <a href="index.php?view=add_prescription" class="btn btn-primary btn-md">
-                    <i class="fa fa-plus-circle fw-fa"></i> Add New Prescription
-                </a>
-            </h1>
-        <?php } ?>
-    </div>
+<div class="page-header-bar">
+  <div>
+    <h1 class="h3 mb-1">Prescriptions</h1>
+    <p class="text-muted small mb-0">View and manage patient medical prescriptions</p>
+  </div>
+  <?php if ($canCreate): ?>
+    <a href="index.php?view=add_prescription" class="btn btn-primary">
+      <i class="bi bi-plus-circle me-1"></i> Add Prescription
+    </a>
+  <?php endif; ?>
 </div>
 
-<div class="table-responsive">
-    <table id="dash-tables" class="table table-striped table-bordered table-hover" style="font-size:12px" cellspacing="0">
+<div class="content-card">
+  <div class="card-body">
+    <div class="table-responsive">
+      <table id="prescription-table" class="table table-modern table-hover table-bordered" cellspacing="0">
         <thead>
-            <tr>
-                <th>PRESCRIPTION NO.</th>
-                <th>Patient Name</th>
-                <th>Medicine Name</th>
-                <th>Dosage</th>
-                <th>Creation Date</th>
-                <th>Doctor</th>
-                <th width="18%">Actions</th>
-            </tr>
+          <tr>
+            <th>Prescription No.</th>
+            <th>Patient</th>
+            <th>Medicine</th>
+            <th>Dosage</th>
+            <th>Created</th>
+            <th>Doctor</th>
+            <th width="14%" class="text-center">Action</th>
+          </tr>
         </thead>
         <tbody>
-            <?php
-            $sql = "
-    SELECT pr.*, 
-           CONCAT(p.Fname,' ' , Mname, '', p.Lname) AS patient_name,
-           p.ContactNo AS patient_phone,
-           FullName AS doctor_name
-    FROM prescriptions pr
-    LEFT JOIN tblpatients p ON pr.patient_id = p.PatientID
-    JOIN tblusers u ON pr.user_id = u.UserID
-    WHERE u.Username = 'admin'
-    
-";
-            $mydb->setQuery($sql);
-            $prescriptions = $mydb->loadResultList();
+          <?php
+          $sql = "SELECT pr.*,
+                  CONCAT(p.Fname, ' ', p.Mname, ' ', p.Lname) AS patient_name,
+                  u.FullName AS doctor_name,
+                  u.Username AS doctor_username,
+                  u.Role AS doctor_role
+                  FROM prescriptions pr
+                  LEFT JOIN tblpatients p ON pr.patient_id = p.PatientID
+                  LEFT JOIN tblusers u ON pr.user_id = u.UserID
+                  ORDER BY pr.created_at DESC, pr.id DESC";
+          $mydb->setQuery($sql);
+          $prescriptions = $mydb->loadResultList();
 
-            if (empty($prescriptions)) {
-                // ... (عرض رسالة لا يوجد بيانات) ...
-                echo '<tr>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td style="text-align:center;">No prescriptions available yet.</td>
-                      </tr>';
-            } else {
-                $counter = 1;
-                foreach ($prescriptions as $pr) {
-                    echo '<tr>';
-                    // ⭐⭐ التعديل الرئيسي: استخدام حقل قاعدة البيانات الفعلي
-                    echo '<td>' . htmlspecialchars($pr->prescription_no ?? 'N/A') . '</td>';
-                    echo '<td>' . htmlspecialchars($pr->patient_name ?? '') . '</td>';
-                    echo '<td>' . htmlspecialchars($pr->medicine_name ?? '') . '</td>';
-                    echo '<td>' . htmlspecialchars($pr->dosage ?? '') . '</td>';
-                    echo '<td>' . ($pr->created_at ? date('d/m/Y', strtotime($pr->created_at)) : '') . '</td>';
-                    echo '<td>' . htmlspecialchars($pr->doctor_name ?? '') . '</td>';
-                    echo '<td>';
+          if (empty($prescriptions)) {
+            echo '<tr><td colspan="7" class="text-center text-muted py-4">No prescriptions found. Add your first prescription to get started.</td></tr>';
+          } else {
+            foreach ($prescriptions as $pr) {
+              $prescriptionNo = !empty($pr->prescription_no) ? $pr->prescription_no : ('PRESC_' . $pr->id);
+              $createdAt = $pr->created_at ? date('m/d/Y', strtotime($pr->created_at)) : '—';
+              $doctorName = trim($pr->doctor_name ?? '');
+              $doctorUsername = trim($pr->doctor_username ?? '');
+              $doctorRole = trim($pr->doctor_role ?? '');
+              $genericDoctorNames = array('doctor', 'admin', 'administrator', 'staff', 'user');
 
-                    echo '<a href="index.php?view=view&id=' . $pr->id . '" class="btn btn-md btn-info" title="View"> <i class="fa fa-info"></i> View</a> ';
-
-
-                    if ($_SESSION['ADMIN_ROLE'] == 'Administrator' || $_SESSION['ADMIN_ROLE'] == 'admin') {
-
-                        echo '<a href="index.php?view=edit_prescription&presc_id=' . $pr->id . '" class="btn btn-md btn-primary">
-                            <i class="fa fa-edit"></i>Edit
-                            </a>';
-
-                        // <a href="controller.php?action=delete&id=' . $result->InvoiceNo . '" class="btn btn-md btn-danger"><i class="fa fa-trash"></i> Delete</a></td>';
-                        echo '<a href="controller.php?action=delete_prescription&id=' . $pr->id . '" class="btn btn-md btn-danger">
-                        <i class="fa fa-trash"></i> Delete
-                        </a>';
-                    }
-
-                    echo '</td>';
-                    echo '</tr>';
+              if ($doctorName === '' || in_array(strtolower($doctorName), $genericDoctorNames, true)) {
+                if ($doctorUsername !== '' && !in_array(strtolower($doctorUsername), array('admin', 'staff'), true)) {
+                  $doctorName = ucwords(str_replace(array('_', '.'), ' ', $doctorUsername));
+                } elseif ($doctorRole !== '') {
+                  $doctorName = $doctorRole;
+                } elseif ($doctorUsername !== '') {
+                  $doctorName = ucfirst($doctorUsername);
+                } else {
+                  $doctorName = '—';
                 }
+              }
+
+              echo '<tr>';
+              echo '<td>' . htmlspecialchars($prescriptionNo) . '</td>';
+              echo '<td>' . htmlspecialchars(trim($pr->patient_name ?? '—')) . '</td>';
+              echo '<td>' . htmlspecialchars($pr->medicine_name ?? '') . '</td>';
+              echo '<td>' . htmlspecialchars($pr->dosage ?? '') . '</td>';
+              echo '<td>' . htmlspecialchars($createdAt) . '</td>';
+              echo '<td>' . htmlspecialchars($doctorName) . '</td>';
+              echo '<td class="text-center text-nowrap">';
+              echo '<a href="index.php?view=view&id=' . (int)$pr->id . '" class="btn btn-sm btn-outline-primary btn-action me-1" title="View"><i class="bi bi-eye"></i></a>';
+
+              if ($isAdmin) {
+                echo '<a href="index.php?view=edit_prescription&presc_id=' . (int)$pr->id . '" class="btn btn-sm btn-outline-secondary btn-action me-1" title="Edit"><i class="bi bi-pencil"></i></a>';
+                echo '<a href="controller.php?action=delete_prescription&id=' . (int)$pr->id . '" class="btn btn-sm btn-outline-danger btn-action btn-delete-prescription" title="Delete" data-prescription="' . htmlspecialchars($prescriptionNo) . '" data-patient="' . htmlspecialchars(trim($pr->patient_name ?? '')) . '" data-medicine="' . htmlspecialchars($pr->medicine_name ?? '') . '"><i class="bi bi-trash"></i></a>';
+              }
+
+              echo '</td>';
+              echo '</tr>';
             }
-            ?>
+          }
+          ?>
         </tbody>
-    </table>
+      </table>
+    </div>
+  </div>
 </div>

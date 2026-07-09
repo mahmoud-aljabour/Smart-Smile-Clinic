@@ -49,7 +49,7 @@ function doInsert()
         // Server-side validation for ToothNumber count (updated to allow 0)
         $result = calculateToothCountServer($ToothNumber, $maxTeeth);
         if (!$result['valid']) {
-            echo '<script>alert("Cannot save: ' . addslashes($result['error']) . '. Reason: Tooth number exceeds the age group limit of ' . $maxTeeth . ' teeth. Stay on page to correct.")</script>';
+            message("Cannot save: " . $result['error'], "error");
             redirect("index.php?view=add");
             die(); // Stop execution here!
         }
@@ -134,7 +134,7 @@ function doEdit()
 
         $result = calculateToothCountServer($ToothNumber, $maxTeeth);
         if (!$result['valid']) {
-            echo '<script>alert("Cannot save: ' . addslashes($result['error']) . '. Reason: Tooth number exceeds the age group limit of ' . $maxTeeth . ' teeth. Stay on page to correct.")</script>';
+            message("Cannot save: " . $result['error'], "error");
             redirect("index.php?view=edit&id=" . $_POST['SKU']);
             die(); // Stop execution
         }
@@ -271,9 +271,12 @@ function deleteBulk()
 
 // Helper function for server-side tooth count (updated to allow 0)
 function calculateToothCountServer($toothStr, $maxTeeth) {
-    $toothStr = trim($toothStr); // Extra trim
-    if (empty($toothStr)) return ['valid' => false, 'error' => 'Empty input'];
-    
+    $toothStr = trim($toothStr);
+    // Do not use empty() — in PHP empty('0') is true, but 0 means "all teeth"
+    if ($toothStr === '') {
+        return ['valid' => false, 'error' => 'Tooth number is required.'];
+    }
+
     if (strtolower($toothStr) === '0' || strtolower($toothStr) === 'all') {
       return ['valid' => true, 'error' => '']; // "0" or "all" is valid for all teeth
     }

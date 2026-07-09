@@ -5,10 +5,9 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <title><?php
-    global $setDefault;
-    $user = new User();
-    $singleuser = $user->single_user($_SESSION['ADMIN_USERID']);
-    if ($singleuser != '') {
+    if (!empty($documentTitle)) {
+      echo htmlspecialchars($documentTitle);
+    } elseif (!empty($_SESSION['ADMIN_FULLNAME'])) {
       echo htmlspecialchars($_SESSION['ADMIN_FULLNAME']);
     } else {
       echo htmlspecialchars(app_name);

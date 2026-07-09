@@ -31,6 +31,10 @@ switch ($action) {
         # code...
         doUpdateStatus();
         break;
+
+    case 'discarddraft':
+        doDiscardDraft();
+        break;
 }
 
 
@@ -225,6 +229,20 @@ function doDelete()
 
     message("Invoice has been deleted!", "success");
     // redirect("index.php?view=view&id=".$_POST['EMPLOYEEID']);
+    redirect("index.php");
+}
+
+function doDiscardDraft()
+{
+    $invno = isset($_GET['invno']) ? $_GET['invno'] : '';
+    delete_empty_invoice($invno);
+
+    if (!empty($_GET['ajax'])) {
+        header('Content-Type: application/json');
+        echo json_encode(array('success' => true));
+        exit;
+    }
+
     redirect("index.php");
 }
 

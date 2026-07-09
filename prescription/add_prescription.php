@@ -145,6 +145,13 @@ $patients = $mydb->loadResultList();
         firstInvalid.focus();
         firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
+      return;
+    }
+
+    var submitBtn = form.querySelector('button[type="submit"]');
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Saving...';
     }
   });
 

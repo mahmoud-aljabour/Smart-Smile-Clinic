@@ -3,6 +3,14 @@ if (!isset($_SESSION['ADMIN_USERID'])) {
   redirect(web_root . "login.php");
 }
 
+$sql = "SELECT * FROM `tblprintheader`";
+$mydb->setQuery($sql);
+$printHeader = $mydb->loadSingleResult();
+
+$sql = "SELECT * FROM `tblprintfooter`";
+$mydb->setQuery($sql);
+$printFooter = $mydb->loadSingleResult();
+
 $dateFrom = isset($_POST['date_from']) ? $_POST['date_from'] : date('m/d/Y');
 $dateTo = isset($_POST['date_to']) ? $_POST['date_to'] : date('m/d/Y');
 $submitted = isset($_POST['submit']);
@@ -15,13 +23,24 @@ $totalprice = 0;
 $rows = array();
 
 if ($submitted) {
-  $sql = "SELECT i.Services, i.Price, p.InvoiceDate, p.InvoiceNo
+  $sql = "SELECT i.Services, i.Price, pay.InvoiceDate, pay.InvoiceNo,
+          s.Services AS CatalogService, s.Description AS CatalogDescription
           FROM tblinvoice i
-          INNER JOIN tblpayments p ON i.InvoiceNo = p.InvoiceNo
-          WHERE p.Status = 'Paid'
-          AND DATE(p.InvoiceDate) >= '{$datefrom}'
-          AND DATE(p.InvoiceDate) <= '{$dateto}'
-          ORDER BY p.InvoiceDate DESC, i.Services ASC";
+          INNER JOIN (
+            SELECT InvoiceNo, MAX(InvoiceDate) AS InvoiceDate
+            FROM tblpayments
+            WHERE Status = 'Paid' AND Class = 'Invoice'
+            GROUP BY InvoiceNo
+          ) pay ON i.InvoiceNo = pay.InvoiceNo
+          INNER JOIN (
+            SELECT MIN(InvoiceID) AS InvoiceID
+            FROM tblinvoice
+            GROUP BY InvoiceNo, SKU
+          ) uniq ON i.InvoiceID = uniq.InvoiceID
+          LEFT JOIN tblservices s ON i.SKU = s.SKU
+          WHERE DATE(pay.InvoiceDate) >= '{$datefrom}'
+          AND DATE(pay.InvoiceDate) <= '{$dateto}'
+          ORDER BY pay.InvoiceDate DESC, i.InvoiceID ASC";
   $mydb->setQuery($sql);
   $rows = $mydb->loadResultList();
   foreach ($rows as $result) {
@@ -30,18 +49,6 @@ if ($submitted) {
 }
 ?>
 
-<style>
-  @media print {
-    .no-print,
-    .no-print * {
-      display: none !important;
-    }
-    .report-print-area {
-      box-shadow: none !important;
-      border: none !important;
-    }
-  }
-</style>
 
 <div class="page-header-bar no-print">
   <div>
@@ -86,61 +93,104 @@ if ($submitted) {
   </div>
 </form>
 
-<div class="content-card report-print-area">
-  <div class="card-body">
-    <div class="report-meta text-center mb-4">
-      <h2 class="h5 mb-2">Sales Report</h2>
-      <p class="text-muted small mb-1">As of <?php echo date('m/d/Y'); ?></p>
-      <?php if ($submitted): ?>
-        <p class="mb-0">
-          <span class="info-badge">
-            <i class="bi bi-calendar-range"></i>
-            <?php echo htmlspecialchars($dateFrom); ?> — <?php echo htmlspecialchars($dateTo); ?>
-          </span>
-        </p>
-      <?php else: ?>
-        <p class="text-muted small mb-0">Select a date range and click Generate Report</p>
-      <?php endif; ?>
-    </div>
+<div class="sales-report-page">
+  <div class="report-print-header">
+    <div class="line-main"><?php echo htmlspecialchars($printHeader->SecondLine ?? app_name); ?></div>
+    <?php if (!empty($printHeader->ThirdLine)): ?>
+      <div class="line-sub"><?php echo htmlspecialchars($printHeader->ThirdLine); ?></div>
+    <?php endif; ?>
+  </div>
 
-    <?php if ($submitted): ?>
-      <div class="table-responsive">
-        <table class="table table-modern table-hover table-bordered mb-0">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Service</th>
-              <th>Invoice No.</th>
-              <th>Invoice Date</th>
-              <th class="text-end">Price (<?php echo htmlspecialchars($currency); ?>)</th>
-            </tr>
-          </thead>
-          <tbody>
-            <?php if (count($rows) === 0): ?>
-              <tr>
-                <td colspan="5" class="text-center text-muted py-4">No paid services found for this date range.</td>
-              </tr>
-            <?php else: ?>
-              <?php $counter = 1; foreach ($rows as $result): ?>
-                <tr>
-                  <td><?php echo $counter++; ?></td>
-                  <td><?php echo htmlspecialchars($result->Services); ?></td>
-                  <td><?php echo htmlspecialchars($result->InvoiceNo); ?></td>
-                  <td><?php echo date('m/d/Y', strtotime($result->InvoiceDate)); ?></td>
-                  <td class="text-end"><?php echo number_format($result->Price, 2); ?></td>
-                </tr>
-              <?php endforeach; ?>
-            <?php endif; ?>
-          </tbody>
-        </table>
+  <div class="content-card report-print-area">
+    <div class="card-body">
+      <div class="report-meta text-center mb-4">
+        <h2 class="report-title mb-2">Sales Report</h2>
+        <p class="text-muted small mb-1 report-generated-on">As of <?php echo date('m/d/Y'); ?></p>
+        <?php if ($submitted): ?>
+          <p class="mb-0">
+            <span class="info-badge">
+              <i class="bi bi-calendar-range"></i>
+              <?php echo htmlspecialchars($dateFrom); ?> — <?php echo htmlspecialchars($dateTo); ?>
+            </span>
+          </p>
+        <?php else: ?>
+          <p class="text-muted small mb-0">Select a date range and click Generate Report</p>
+        <?php endif; ?>
       </div>
 
-      <?php if (count($rows) > 0): ?>
-        <div class="invoice-total-box mt-4">
+      <?php if ($submitted): ?>
+        <div class="report-print-summary">
+          <div class="summary-item">
+            <span class="summary-label">Report Period</span>
+            <span class="summary-value"><?php echo htmlspecialchars($dateFrom); ?> — <?php echo htmlspecialchars($dateTo); ?></span>
+          </div>
+          <div class="summary-item">
+            <span class="summary-label">Total Records</span>
+            <span class="summary-value"><?php echo number_format(count($rows)); ?></span>
+          </div>
+          <div class="summary-item">
+            <span class="summary-label">Generated On</span>
+            <span class="summary-value"><?php echo date('m/d/Y g:i A'); ?></span>
+          </div>
+        </div>
+
+        <div class="table-responsive report-table-wrap">
+          <table class="table table-modern table-hover table-bordered report-table mb-0">
+            <thead>
+              <tr>
+                <th class="col-num">#</th>
+                <th class="col-service">Service</th>
+                <th class="col-invoice">Invoice No.</th>
+                <th class="col-date">Invoice Date</th>
+                <th class="col-price text-end">Price (<?php echo htmlspecialchars($currency); ?>)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <?php if (count($rows) === 0): ?>
+                <tr>
+                  <td colspan="5" class="text-center text-muted py-4">No paid services found for this date range.</td>
+                </tr>
+              <?php else: ?>
+                <?php $counter = 1; foreach ($rows as $result): ?>
+                  <tr>
+                    <td class="col-num"><?php echo $counter++; ?></td>
+                    <?php $serviceLabel = invoice_service_label($result, $result->CatalogService ?? '', $result->CatalogDescription ?? ''); ?>
+                    <td class="col-service"><?php echo htmlspecialchars($serviceLabel); ?></td>
+                    <td class="col-invoice"><?php echo htmlspecialchars($result->InvoiceNo); ?></td>
+                    <td class="col-date"><?php echo date('m/d/Y', strtotime($result->InvoiceDate)); ?></td>
+                    <td class="col-price text-end"><?php echo number_format($result->Price, 2); ?></td>
+                  </tr>
+                <?php endforeach; ?>
+              <?php endif; ?>
+            </tbody>
+            <?php if (count($rows) > 0): ?>
+              <tfoot>
+                <tr class="report-total-row">
+                  <td colspan="4" class="text-end">Total Revenue</td>
+                  <td class="text-end"><?php echo htmlspecialchars($currency); ?> <?php echo number_format($totalprice, 2); ?></td>
+                </tr>
+              </tfoot>
+            <?php endif; ?>
+          </table>
+        </div>
+
+        <div class="invoice-total-box report-screen-total mt-4">
           <span class="total-label">Total Revenue</span>
           <span class="total-value"><?php echo htmlspecialchars($currency); ?> <?php echo number_format($totalprice, 2); ?></span>
         </div>
       <?php endif; ?>
+    </div>
+  </div>
+
+  <div class="report-print-footer">
+    <?php if (!empty($printFooter->FirstLine)): ?>
+      <div class="line-sub"><?php echo htmlspecialchars($printFooter->FirstLine); ?></div>
+    <?php endif; ?>
+    <?php if (!empty($printFooter->SecondLine)): ?>
+      <div class="line-sub"><?php echo htmlspecialchars($printFooter->SecondLine); ?></div>
+    <?php endif; ?>
+    <?php if (!empty($printFooter->ThirdLine)): ?>
+      <div class="line-sub"><?php echo htmlspecialchars($printFooter->ThirdLine); ?></div>
     <?php endif; ?>
   </div>
 </div>

@@ -1,200 +1,212 @@
 <?php
 if (!isset($_SESSION['ADMIN_USERID'])) {
-	redirect(web_root . "login.php");
+  redirect(web_root . "login.php");
 }
 
-$sql = "SELECT * FROM tblpatients WHERE PatientID=" . $_GET['id'];
+$patientId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+if ($patientId <= 0) {
+  redirect("index.php");
+}
+
+$sql = "SELECT * FROM tblpatients WHERE PatientID = {$patientId}";
 $mydb->setQuery($sql);
 $res = $mydb->loadSingleResult();
 
-$Patients = $res->Fname . ' ' . $res->Mname . ' ' . $res->Lname;
+if (!$res) {
+  message("Patient not found.", "error");
+  redirect("index.php");
+}
 
-$age = (int)$res->Age; 
+$fullName = trim($res->Fname . ' ' . $res->Mname . ' ' . $res->Lname);
+$age = (int)$res->Age;
+$currency = $setDefault->default_currency();
 
 if ($age == 0) {
-	$total_teeth = 0;
+  $total_teeth = 0;
 } elseif ($age == 1) {
-	$total_teeth = 8;
+  $total_teeth = 8;
 } elseif ($age == 2) {
-	$total_teeth = 16;
+  $total_teeth = 16;
 } elseif ($age >= 3 && $age <= 5) {
-	$total_teeth = 20;
+  $total_teeth = 20;
 } elseif ($age >= 6 && $age <= 12) {
-	$total_teeth = 24;
+  $total_teeth = 24;
 } elseif ($age >= 13 && $age <= 16) {
-	$total_teeth = 28;
+  $total_teeth = 28;
 } else {
-	$total_teeth = 32;
+  $total_teeth = 32;
+}
+
+$birthDate = '';
+if (!empty($res->BirthDate)) {
+  $birthObj = date_create($res->BirthDate);
+  if ($birthObj) {
+    $birthDate = date_format($birthObj, 'm/d/Y');
+  }
+}
+
+cleanup_patient_invoices($fullName);
+
+$history = get_patient_treatment_history($fullName);
+
+$historyTotal = 0;
+foreach ($history as $row) {
+  $historyTotal += $row->Price;
+}
+
+$treatedTeeth = array();
+foreach (get_patient_treated_teeth($fullName) as $toothRow) {
+  $treatedTeeth[(string)$toothRow->ToothNumber] = true;
 }
 ?>
-<style type="text/css">
-	.table-client {
-		width: 100%;
-	}
 
-	.table-client tr td {
-		border-bottom: 1px solid #ddd;
-		padding: 10px 0px 0px 0px;
-	}
-</style>
-<div class="col-md-12">
-	<table class="table-client">
-		<tr>
-			<td>Patient Name</td>
-			<td> <?php echo $res->Fname . ' ' . $res->Mname . ' ' . $res->Lname; ?></td>
-
-			<td>Sex</td>
-			<td><?php echo $res->Sex; ?></td>
-		</tr>
-		<tr>
-			<td>Age</td>
-			<td><?php echo $res->Age; ?></td>
-
-			<td>Phone #</td>
-			<td><?php echo $res->ContactNo; ?></td>
-
-		</tr>
-		<tr>
-			<td>Address</td>
-			<td colspan="3"> <?php echo $res->F_Address; ?></td>
-		</tr>
-	</table>
+<div class="page-header-bar">
+  <div>
+    <h1 class="h3 mb-1">Patient Details</h1>
+    <p class="text-muted small mb-0"><?php echo htmlspecialchars($fullName); ?> · ID #<?php echo (int)$res->PatientID; ?></p>
+  </div>
+  <div class="d-flex flex-wrap gap-2">
+    <a href="index.php" class="btn btn-outline-secondary">
+      <i class="bi bi-arrow-left"></i> Back to List
+    </a>
+    <a href="index.php?view=edit&id=<?php echo (int)$res->PatientID; ?>" class="btn btn-outline-primary">
+      <i class="bi bi-pencil"></i> Edit Patient
+    </a>
+  </div>
 </div>
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<div class="row">
-	<div class="col-lg-12">
-		<h1 class="page-header">Patient History</h1>
-	</div>
-	<!-- /.col-lg-12 -->
-</div>
-<form action="controller.php?action=delete" Method="POST">
-	<div class="table-responsive">
-		<table id="dash-table" class="table table-striped table-bordered table-hover" style="font-size:12px" cellspacing="0">
 
-			<thead>
-				<tr>
-					<th>Date</th>
-					<th>Services</th>
-					<th>Price</th>
-					<th>Number of Teeth</th>
-					<!-- <th>Total</th>  -->
-					<!-- <th>Remarks</th> -->
-					<!-- <th width="5%" align="center">Action</th> -->
-				</tr>
-			</thead>
-			<tbody>
-				<?php
-				// SELECT `InvoiceID`, `InvoiceNo`, `SKU`, `Services`, `Price`, `QTY`, `SubTotal`, `Remarks`, `UserID`, `Class` FROM `tblinvoice` WHERE 1
-				$mydb->setQuery("SELECT * FROM `tblinvoice` i,`tblpayments` p WHERE i.`InvoiceNo`=p.`InvoiceNo` AND Patients='{$Patients}'");
-				$cur = $mydb->loadResultList();
-				foreach ($cur as $result) {
-					echo '<tr>';
-					// `Fullname`, `CompanyName`, `F_Address`, `S_Address`, `ContactNo`
-					echo '<td>' . $result->InvoiceDate . '</td>';
-					echo '<td>' . $result->Services . '</td>';
-					echo '<td>' . number_format($result->Price, 2) . '</td>';
-					echo '<td>' . $result->ToothNumber . '</td>';
-					// echo '<td>' . $result->SubTotal.'</td>';
-					// echo '<td>' . $result->Remarks . '</td>';
-					// echo '<td align="center"> 
-					// <a title="View" href="index.php?view=edit&id='.$result->InvoiceID.'" class="btn btn-primary btn-md  ">  <span class="fa fa-info fw-fa"> View Records</a>
-					// <a title="Edit" href="index.php?view=edit&id='.$result->InvoiceID.'" class="btn btn-primary btn-md  ">  <span class="fa fa-edit fw-fa"></a>
-					//      <a title="Delete" href="controller.php?action=delete&id='.$result->InvoiceID.'" class="btn btn-danger btn-md  ">  <span class="fa  fa-trash fw-fa "></a></td>';
+<div class="form-add-page patient-view-page invoice-view-page">
 
-					echo '</tr>';
+  <div class="form-page-card mb-4">
+    <div class="card-header">
+      <i class="bi bi-person-vcard"></i> Patient Information
+    </div>
+    <div class="card-body">
+      <div class="patient-info-card">
+        <div class="info-item full-width">
+          <span class="info-label">Patient Name</span>
+          <span class="info-value"><?php echo htmlspecialchars($fullName); ?></span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Sex</span>
+          <span class="info-value"><?php echo htmlspecialchars($res->Sex); ?></span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Age</span>
+          <span class="info-value"><?php echo (int)$res->Age; ?> years</span>
+        </div>
+        <?php if ($birthDate): ?>
+        <div class="info-item">
+          <span class="info-label">Date of Birth</span>
+          <span class="info-value"><?php echo htmlspecialchars($birthDate); ?></span>
+        </div>
+        <?php endif; ?>
+        <div class="info-item">
+          <span class="info-label">Phone</span>
+          <span class="info-value"><?php echo htmlspecialchars($res->ContactNo); ?></span>
+        </div>
+        <div class="info-item full-width">
+          <span class="info-label">Address</span>
+          <span class="info-value"><?php echo htmlspecialchars($res->F_Address); ?></span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Expected Teeth</span>
+          <span class="info-value">
+            <span class="badge text-bg-primary"><?php echo (int)$total_teeth; ?> teeth</span>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
 
-					// $tooth[] =  $result->QTY;
+  <div class="form-page-card mb-4">
+    <div class="card-header">
+      <i class="bi bi-clock-history"></i> Treatment History
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-modern table-hover table-bordered mb-0">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Service</th>
+              <th>Tooth</th>
+              <th class="text-end">Price (<?php echo htmlspecialchars($currency); ?>)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <?php if (empty($history)): ?>
+              <tr>
+                <td colspan="4" class="text-center text-muted py-4">No treatment history found for this patient.</td>
+              </tr>
+            <?php else: ?>
+              <?php foreach ($history as $result): ?>
+                <?php $serviceLabel = invoice_service_label($result, $result->CatalogService ?? '', $result->CatalogDescription ?? ''); ?>
+                <tr>
+                  <td><?php echo date('m/d/Y', strtotime($result->InvoiceDate)); ?></td>
+                  <td><?php echo htmlspecialchars($serviceLabel); ?></td>
+                  <td><?php echo htmlspecialchars($result->ToothNumber); ?></td>
+                  <td class="text-end"><?php echo number_format($result->Price, 2); ?></td>
+                </tr>
+              <?php endforeach; ?>
+            <?php endif; ?>
+          </tbody>
+        </table>
+      </div>
 
+      <?php if (!empty($history)): ?>
+        <div class="invoice-total-box mt-4">
+          <span class="total-label">Total Treatments</span>
+          <span class="total-value"><?php echo htmlspecialchars($currency); ?> <?php echo number_format($historyTotal, 2); ?></span>
+        </div>
+      <?php endif; ?>
+    </div>
+  </div>
 
-					// 		for ($i=1; $i < 17; $i++) { 
-					// 		# code...
-					// 			if ($result->QTY==$i) {
-					// 				# code...
-					// 		echo '<a href="#1"><span style="font-size: 50px" class="icon-iconfinder_Dental_-_Tooth_-_Dentist_-_Dentistry_01_2185089"><span class="path1"></span><span class="path2"></span><span class="path3"></span></span><span class="number" style="color:red">'.$i.'</span>	</a>';
-					// 			}else{
+  <div class="form-page-card">
+    <div class="card-header">
+      <i class="bi bi-emoji-smile"></i> Dental Chart
+    </div>
+    <div class="card-body">
+      <?php if ($total_teeth > 0): ?>
+        <div class="teeth-legend mb-3">
+          <span class="teeth-legend-item"><span class="teeth-dot teeth-dot--treated"></span> Treated</span>
+          <span class="teeth-legend-item"><span class="teeth-dot teeth-dot--healthy"></span> Not treated</span>
+        </div>
 
-					// 		echo '<a href="#1"><span style="font-size: 50px" class="icon-iconfinder_Dental_-_Tooth_-_Dentist_-_Dentistry_01_2185089"><span class="path1"></span><span class="path2"></span><span class="path3"></span></span><span class="number" style="color:blue">'.$i.'</span>	</a>';
-					// 			}
-					// }
-				}
-				?>
-			</tbody>
+        <div class="teeth-chart-grid">
+          <div class="teeth-row-label">Upper</div>
+          <div class="teeth-row">
+            <?php
+            $upper_end = (int)floor($total_teeth / 2);
+            for ($i = 1; $i <= $upper_end; $i++) {
+              $isTreated = isset($treatedTeeth[(string)$i]);
+              echo '<div class="tooth-item' . ($isTreated ? ' is-treated' : '') . '">';
+              echo '<span class="icon-iconfinder_Dental_-_Tooth_-_Dentist_-_Dentistry_01_2185089"><span class="path1"></span><span class="path2"></span><span class="path3"></span></span>';
+              echo '<span class="tooth-number">' . $i . '</span>';
+              echo '</div>';
+            }
+            ?>
+          </div>
 
-		</table>
-
-</form>
-<style type="text/css">
-	.teeth-chart {
-		margin-top: 30px;
-	}
-
-	.teeth-chart a {
-		text-align: center;
-		padding: 5px;
-	}
-
-	.number {
-		font-size: 20px;
-		margin-left: -30px;
-		margin-top: 0px;
-		position: absolute;
-		font-weight: bold;
-		color: red;
-	}
-</style>
-
-<div class="col-md-12 teeth-chart">
-
-	<?php if ($total_teeth > 0): ?>
-		<?php
-		// الصف العلوي: أول نصف من الأسنان (1 إلى نصف الكل)
-		$upper_start = 1;
-		$upper_end = floor($total_teeth / 2);
-		for ($i = $upper_start; $i <= $upper_end; $i++) {
-
-			$mydb->setQuery("SELECT * FROM `tblinvoice` i,`tblpayments` p 
-						WHERE i.`InvoiceNo`=p.`InvoiceNo` 
-						AND Patients='{$Patients}' 
-						AND ToothNumber = '{$i}' 
-						GROUP BY ToothNumber");
-			$r = $mydb->executeQuery();
-			$maxrow = $mydb->num_rows($r);
-
-			if ($maxrow > 0) {
-				$cur = $mydb->loadSingleResult();
-				echo '<a href="#1"><span style="font-size: 50px" class="icon-iconfinder_Dental_-_Tooth_-_Dentist_-_Dentistry_01_2185089"><span class="path1"></span><span class="path2"></span><span class="path3"></span></span><span class="number" style="color:red">' . $cur->ToothNumber . '</span>	</a>';
-			} else {
-				echo '<a href="#1"><span style="font-size: 50px" class="icon-iconfinder_Dental_-_Tooth_-_Dentist_-_Dentistry_01_2185089"><span class="path1"></span><span class="path2"></span><span class="path3"></span></span><span class="number" style="color:blue">' . $i . '</span>	</a>';
-			}
-		}
-		echo '<br/>';
-
-		// الصف السفلي: النصف الثاني، من الأعلى للأسفل (للحفاظ على الترتيب الحالي، بس مقطوع عند $total_teeth)
-		$lower_start = floor($total_teeth / 2) + 1;
-		$lower_end = $total_teeth;
-		for ($i = $lower_start; $i <= $lower_end; $i++) {
-
-			$mydb->setQuery("SELECT * FROM `tblinvoice` i,`tblpayments` p WHERE i.`InvoiceNo`=p.`InvoiceNo` AND Patients='{$Patients}' AND ToothNumber = '{$i}' GROUP BY ToothNumber");
-			$r = $mydb->executeQuery();
-			$maxrow = $mydb->num_rows($r);
-
-			if ($maxrow > 0) {
-				$cur = $mydb->loadSingleResult();
-				echo '<a href="#1"><span style="font-size: 50px" class="icon-iconfinder_Dental_-_Tooth_-_Dentist_-_Dentistry_01_2185089"><span class="path1"></span><span class="path2"></span><span class="path3"></span></span><span class="number" style="color:red">' . $cur->ToothNumber . '</span>	</a>';
-			} else {
-				echo '<a href="#1"><span style="font-size: 50px" class="icon-iconfinder_Dental_-_Tooth_-_Dentist_-_Dentistry_01_2185089"><span class="path1"></span><span class="path2"></span><span class="path3"></span></span><span class="number" style="color:blue">' . $i . '</span>	</a>';
-			}
-		}
-		?>
-
-		<br />
-	<?php else: ?>
-		<p style="text-align: center; font-size: 18px; color: #666; margin-top: 20px;">لا توجد أسنان للعرض (المريض مولود حديثًا).</p>
-	<?php endif; ?>
+          <div class="teeth-row-label">Lower</div>
+          <div class="teeth-row">
+            <?php
+            $lower_start = $upper_end + 1;
+            for ($i = $lower_start; $i <= $total_teeth; $i++) {
+              $isTreated = isset($treatedTeeth[(string)$i]);
+              echo '<div class="tooth-item' . ($isTreated ? ' is-treated' : '') . '">';
+              echo '<span class="icon-iconfinder_Dental_-_Tooth_-_Dentist_-_Dentistry_01_2185089"><span class="path1"></span><span class="path2"></span><span class="path3"></span></span>';
+              echo '<span class="tooth-number">' . $i . '</span>';
+              echo '</div>';
+            }
+            ?>
+          </div>
+        </div>
+      <?php else: ?>
+        <p class="text-center text-muted mb-0 py-3">No teeth chart available for this age group.</p>
+      <?php endif; ?>
+    </div>
+  </div>
 
 </div>

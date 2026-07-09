@@ -37,58 +37,84 @@
   });
 
   $(function() {
-    $(".btn-danger").click(function() {
-      return confirm("Are you sure you want to delete this?");
-    });
-  });
-
-  $(function() {
     $(".btn-trans").click(function() {
       return confirm("Are you sure you want to cancel this?");
     });
   });
 
   $(function() {
-    $.ajax({
-      type: "POST",
-      url: "loaddata.php",
-      dataType: "text",
-      success: function(data) {
-        $('#searchclient').show().html(data);
-      }
-    });
-  });
-
-  $(function() {
-    $.ajax({
-      type: "POST",
-      url: "loadcart.php",
-      dataType: "text",
-      success: function(data) {
-        $('#loadcart').show().html(data);
-      }
-    });
-  });
-
-  $(function() { $('.select2').select2(); });
-
-  $(function() {
-    if ($("#dash-table").length) {
-      $("#dash-table").DataTable({ pageLength: 50 });
-    }
-    if ($('#dash-table2').length) {
-      $('#dash-table2').DataTable({
-        paging: true, lengthChange: false, searching: false,
-        ordering: true, info: true, autoWidth: false
+    if ($('#searchclient').length) {
+      $.ajax({
+        type: "POST",
+        url: "loaddata.php",
+        dataType: "text",
+        success: function(data) {
+          $('#searchclient').show().html(data);
+          $(document).trigger('invoice:patientPanelUpdated');
+        }
       });
     }
   });
 
   $(function() {
-    if ($("#dash-tables").length) {
-      $("#dash-tables").DataTable({
-        order: [[2, "desc"]],
-        pageLength: 50
+    if ($('#loadcart').length) {
+      $.ajax({
+        type: "POST",
+        url: "loadcart.php",
+        dataType: "text",
+        success: function(data) {
+          $('#loadcart').show().html(data);
+        }
+      });
+    }
+  });
+
+  $(function() { $('.select2').select2(); });
+
+  function initModernDataTable(selector, options) {
+    if (!$(selector).length || $.fn.DataTable.isDataTable(selector)) {
+      return;
+    }
+
+    var defaults = {
+      pageLength: 25,
+      lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'All']],
+      language: {
+        search: '',
+        searchPlaceholder: 'Search records...',
+        lengthMenu: 'Show _MENU_',
+        info: 'Showing _START_ to _END_ of _TOTAL_ entries',
+        infoEmpty: 'No entries to show',
+        infoFiltered: '(filtered from _MAX_ total)',
+        zeroRecords: 'No matching records found',
+        paginate: {
+          first: '<i class="bi bi-chevron-double-left"></i>',
+          last: '<i class="bi bi-chevron-double-right"></i>',
+          next: '<i class="bi bi-chevron-right"></i>',
+          previous: '<i class="bi bi-chevron-left"></i>'
+        }
+      },
+      dom: '<"dt-toolbar row g-2 align-items-center"<"col-12 col-md-6"l><"col-12 col-md-6"f>>rt<"row g-2 align-items-center mt-3"<"col-12 col-md-6"i><"col-12 col-md-6"p>>',
+      responsive: true,
+      autoWidth: false
+    };
+
+    $(selector).DataTable($.extend(true, {}, defaults, options || {}));
+  }
+
+  $(function() {
+    initModernDataTable('#dash-table');
+    initModernDataTable('#dash-tables', { order: [[2, 'desc']], pageLength: 50 });
+    initModernDataTable('#prescription-table', { order: [[4, 'desc']], pageLength: 25 });
+
+    if ($('#dash-table2').length && !$.fn.DataTable.isDataTable('#dash-table2')) {
+      $('#dash-table2').DataTable({
+        paging: true,
+        lengthChange: false,
+        searching: false,
+        ordering: true,
+        info: true,
+        autoWidth: false
       });
     }
   });
@@ -142,19 +168,34 @@
 </script>
 
 <?php
-$products = [];
-$sql = "Select * From tblservices";
-$mydb->setQuery($sql);
-$cur = $mydb->loadResultList();
-foreach ($cur as $result) {
-  $products[] = $result->Services;
+$invoiceSuggestUrl = '';
+if (isset($title) && $title === 'Invoices' && isset($view) && in_array($view, array('add', 'edit'), true)) {
+  $invoiceSuggestUrl = web_root . 'invoices/servicesuggest.php';
 }
 ?>
 
 <script>
-  var pro = <?php echo json_encode($products); ?>;
-
   if ($("#SKU").length) {
+    <?php if ($invoiceSuggestUrl !== ''): ?>
+    $("#SKU").autoComplete({
+      minChars: 1,
+      source: function(term, suggest) {
+        $.getJSON("<?php echo $invoiceSuggestUrl; ?>", { term: term, scope: 'all' }, function(data) {
+          suggest(data || []);
+        });
+      }
+    });
+    <?php else: ?>
+    <?php
+    $products = [];
+    $sql = "Select * From tblservices";
+    $mydb->setQuery($sql);
+    $cur = $mydb->loadResultList();
+    foreach ($cur as $result) {
+      $products[] = $result->Services;
+    }
+    ?>
+    var pro = <?php echo json_encode($products); ?>;
     $("#SKU").autoComplete({
       minChars: 1,
       source: function(term, suggest) {
@@ -165,39 +206,7 @@ foreach ($cur as $result) {
         suggest(matches);
       }
     });
-  }
-
-  <?php
-  $data_products = [];
-  $sql = "Select * From tblservices ";
-  $mydb->setQuery($sql);
-  $cur = $mydb->loadResultList();
-  foreach ($cur as $result) {
-    $data_products[] = $result->Services;
-  }
-  ?>
-  var availableTags = <?php echo json_encode($data_products); ?>;
-
-  if ($("#findProducts").length) {
-    $("#findProducts").autoComplete({
-      minChars: 0,
-      source: function(term, suggest) {
-        term = term.toLowerCase();
-        var matches = [];
-        for (var i = 0; i < availableTags.length; i++)
-          if (~availableTags[i].toLowerCase().indexOf(term)) matches.push(availableTags[i]);
-        suggest(matches);
-      }
-    });
-
-    $("#findProducts").on("keyup change", function() {
-      var searchvalue = $(this).val();
-      $.ajax({
-        type: "POST", url: "loaddashboard.php", dataType: "text",
-        data: { search_data: searchvalue },
-        success: function(data) { $("#loaddashboard").html(data); }
-      });
-    });
+    <?php endif; ?>
   }
 
   function validate_fields() {

@@ -1,7 +1,6 @@
 <?php
 require_once("../include/initialize.php");
 if (isset($_POST['SKU'])) {
-	# code...
 	$sku = $_POST['SKU'];
 	$invno = $_POST['invno'];
 	Add_Invoice($invno, $sku, "Invoice");
@@ -88,19 +87,22 @@ if (isset($_POST['deleteCart'])) {
 		$invno = $_SESSION['invno'];
 		$totalamount = 0;
 		$subtotal = 0;
-		// $taxrate=0;
 
+		deduplicate_invoice_lines($invno);
 
-		$sql = "SELECT * FROM `tblinvoice` WHERE `InvoiceNo`='{$invno}'";
+		$sql = "SELECT i.*, s.Services AS CatalogService, s.Description AS CatalogDescription
+			FROM tblinvoice i
+			LEFT JOIN tblservices s ON i.SKU = s.SKU
+			WHERE i.InvoiceNo='{$invno}'
+			ORDER BY i.InvoiceID ASC";
 		$mydb->setQuery($sql);
 		$cur_inv = $mydb->loadResultList();
 		foreach ($cur_inv as $row) {
-			# code... 
+			$serviceLabel = invoice_service_label($row, $row->CatalogService ?? '', $row->CatalogDescription ?? '');
 			echo '<tr>';
 			echo '<td><a class="delCart btn btn-sm btn-outline-danger" title="Remove" href="#" data-id="' . $row->SKU . '"><i class="bi bi-trash"></i></a></td>';
-			echo '<td>' . $row->ToothNumber . '</td>';
-			// echo '<td><input type="number" name="qty" id="qty'.$row->SKU.'" min="1" class="form-control input-cart" autocomplete="off" value="'.$row->QTY.'" data-id="'.$row->SKU.'"></td>'; 
-			echo '<td>' . $row->Services . '</td>';
+			echo '<td>' . htmlspecialchars($row->ToothNumber) . '</td>';
+			echo '<td>' . htmlspecialchars($serviceLabel) . '</td>';
 
 			if ($_SESSION['ADMIN_ROLE'] == 'Administrator') {
 				# code...

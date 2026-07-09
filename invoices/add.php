@@ -13,6 +13,8 @@ if ($invno == "") {
 	redirect("index.php");
 }
 
+cleanup_invoice_records($invno);
+
 $TotalQTY = 0;
 $TotalTax  = 0;
 $TotalAmount  = 0;
@@ -36,8 +38,9 @@ $sql = "SELECT * FROM tblpayments WHERE InvoiceNo='{$invno}'";
 $mydb->setQuery($sql);
 $res = $mydb->loadSingleResult();
 
-if ($res->Patients != "") {
+if ($res->Patients != "" && $res->Patients != "NONE") {
 	$_SESSION['Patients'] = $res->Patients;
+	sync_patient_age_group_from_name($res->Patients);
 }
 
 if (empty($_SESSION['admin_gcCart'])) {
@@ -62,7 +65,7 @@ $currency = $setDefault->default_currency();
     <h1 class="h3 mb-1">Create Invoice</h1>
     <p class="text-muted small mb-0">Add patient, services, and preview before printing</p>
   </div>
-  <a href="index.php" class="btn btn-outline-secondary">
+  <a href="controller.php?action=discarddraft&amp;invno=<?php echo urlencode($invno); ?>" class="btn btn-outline-secondary" id="invoiceBackBtn">
     <i class="bi bi-arrow-left"></i> Back to List
   </a>
 </div>
@@ -134,7 +137,7 @@ $currency = $setDefault->default_currency();
           <a href="#" class="btn btn-primary" id="addtoinvoice" name="addinvoice">
             <i class="bi bi-plus-circle"></i> Add to Invoice
           </a>
-          <a href="#" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalproducts">
+          <a href="#" class="btn btn-outline-primary" id="browseServicesBtn" data-bs-toggle="modal" data-bs-target="#modalproducts">
             <i class="bi bi-grid"></i> Browse Services
           </a>
         </div>
@@ -148,22 +151,14 @@ $currency = $setDefault->default_currency();
     <a href="printinvoice.php?id=<?php echo urlencode($invno); ?>" class="btn btn-primary btn-lg">
       <i class="bi bi-printer"></i> Preview Print
     </a>
-    <a href="index.php" class="btn btn-outline-secondary">
+    <a href="index.php" class="btn btn-outline-secondary" id="invoiceCancelBtn">
       <i class="bi bi-x-lg"></i> Cancel
     </a>
   </div>
 
 </div>
 
-<?php
+ <?php
 include("addModal.php");
 include("modalsearchproduct.php");
 ?>
-
-<script type="text/javascript">
-  $(function() {
-    $('.select2').select2({
-      width: '100%'
-    });
-  });
-</script>

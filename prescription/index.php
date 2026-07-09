@@ -8,6 +8,8 @@ $view = (isset($_GET['view']) && $_GET['view'] != '') ? $_GET['view'] : '';
 $title = "Prescriptions";
 $header = $view;
 $viewLabels = array(
+    '' => 'Prescriptions',
+    'list' => 'Prescriptions',
     'prescriptions' => 'Prescriptions',
     'add_prescription' => 'Add Prescription',
     'edit_prescription' => 'Edit Prescription',
@@ -30,9 +32,22 @@ switch ($view) {
         break;
 
     case 'view':
-
         $content = 'view_prescription.php';
-        $title = "View Prescription";
+        if (!empty($_GET['id'])) {
+            $prescIdTitle = (int)$_GET['id'];
+            $mydb->setQuery("SELECT pr.prescription_no, pr.id,
+                CONCAT(p.Fname, ' ', p.Mname, ' ', p.Lname) AS patient_name
+                FROM prescriptions pr
+                JOIN tblpatients p ON pr.patient_id = p.PatientID
+                WHERE pr.id = '{$prescIdTitle}'");
+            $prescTitle = $mydb->loadSingleResult();
+            if ($prescTitle) {
+                $prescNo = !empty($prescTitle->prescription_no)
+                    ? $prescTitle->prescription_no
+                    : ('PRESC_' . $prescTitle->id);
+                $documentTitle = invoice_file_label($prescNo, trim($prescTitle->patient_name));
+            }
+        }
         break;
 
     case 'add_prescription': 

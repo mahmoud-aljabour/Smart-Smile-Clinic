@@ -3,147 +3,294 @@ if (!isset($_SESSION['ADMIN_USERID'])) {
   redirect(web_root . "login.php");
 }
 
-$PatientID = $_GET['id'];
+$patientId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+if ($patientId <= 0) {
+  redirect("index.php");
+}
+
 $client = new Patients();
-$res = $client->single_patient($PatientID);
+$res = $client->single_patient($patientId);
 
+if (!$res) {
+  message("Patient not found.", "error");
+  redirect("index.php");
+}
+
+$fullName = trim($res->Fname . ' ' . $res->Mname . ' ' . $res->Lname);
+$birthDateValue = '';
+if (!empty($res->BirthDate)) {
+  $birthObj = date_create($res->BirthDate);
+  if ($birthObj) {
+    $birthDateValue = date_format($birthObj, 'm/d/Y');
+  }
+}
 ?>
-<form class="form-horizontal span6" action="controller.php?action=edit" method="POST">
 
-
-  <div class="row">
-    <div class="col-lg-12">
-      <h1 class="page-header">Update Client</h1>
-    </div>
-    <!-- /.col-lg-12 -->
+<div class="page-header-bar">
+  <div>
+    <h1 class="h3 mb-1">Edit Patient</h1>
+    <p class="text-muted small mb-0"><?php echo htmlspecialchars($fullName); ?> · ID #<?php echo (int)$res->PatientID; ?></p>
   </div>
+  <a href="index.php" class="btn btn-outline-secondary">
+    <i class="bi bi-arrow-left"></i> Back to List
+  </a>
+</div>
 
+<form action="controller.php?action=edit" method="POST" autocomplete="off" id="patientForm" class="form-add-page" novalidate>
 
-  <div class="form-group">
-    <div class="col-md-8">
-      <label class="col-md-4 control-label" for="Fname">First Name:</label>
+  <input type="hidden" name="PatientID" value="<?php echo (int)$res->PatientID; ?>">
 
-      <div class="col-md-8">
-        <input type="hidden" name="PatientID" value="<?php echo $res->PatientID; ?>">
-        <input class="form-control input-sm" id="Fname" name="Fname" placeholder="Firts Name" type="text" value="<?php echo $res->Fname; ?>" autocomplete="off">
-      </div>
+  <div class="form-page-card mb-4">
+    <div class="card-header">
+      <i class="bi bi-person-vcard"></i> Personal Information
     </div>
-  </div>
-
-  <div class="form-group">
-    <div class="col-md-8">
-      <label class="col-md-4 control-label" for="Mname">Middle Name:</label>
-
-      <div class="col-md-8">
-        <input class="form-control input-sm" id="Mname" name="Mname" placeholder="Middle Name" type="text" value="<?php echo $res->Mname; ?>" autocomplete="off">
-      </div>
-    </div>
-  </div>
-
-  <div class="form-group">
-    <div class="col-md-8">
-      <label class="col-md-4 control-label" for="Lname">Last Name:</label>
-
-      <div class="col-md-8">
-        <input class="form-control input-sm" id="Lname" name="Lname" placeholder="Last Name" type="text" value="<?php echo $res->Lname; ?>" autocomplete="off">
-      </div>
-    </div>
-  </div>
-
-
-  <div class="form-group">
-    <div class="col-md-8">
-      <label class="col-md-4 control-label" for="F_Address">Address:</label>
-      <div class="col-md-8">
-        <textarea class="form-control input-sm" id="F_Address" name="F_Address" placeholder="Address" type="text" value="" onkeyup="javascript:capitalize(this.id, this.value);" autocomplete="off"><?php echo $res->F_Address; ?></textarea>
-
-      </div>
-    </div>
-  </div>
-
-  <div class="form-group">
-    <div class="col-md-8">
-      <label class="col-md-4 control-label" for="Sex">Sex:</label>
-
-      <div class="col-md-8">
-        <select class="form-control input-sm" id="Sex" name="Sex">
-          <option <?php echo ($res->Sex == 'Male') ? 'SELECTED' : ''; ?>>Male</option>
-          <option <?php echo ($res->Sex == 'Female') ? 'SELECTED' : ''; ?>>Female</option>
-        </select>
-      </div>
-    </div>
-  </div>
-
-  <!--  <div class="form-group">
-                    <div class="col-md-8">
-                      <label class="col-md-4 control-label" for=
-                      "Age">Age:</label>
-
-                      <div class="col-md-8">
-                         <input class="form-control input-sm" id="Age" name="Age" placeholder=
-                            "Age" type="text" min="2" max="100"  maxlength="2" value="<?php echo $res->Age; ?>" autocomplete="off">
-                      </div>
-                    </div>
-                  </div> -->
-
-  <div class="form-group">
-    <div class="col-md-8">
-      <label class="col-md-4 control-label" for="BirthDate">Date of Birth:</label>
-
-      <div class="col-md-8">
-        <div class="input-group date  " data-provide="datepicker" data-date="2012-12-21T15:25:00Z">
-          <input type="input" class="form-control input-sm date_picker date_inv" id="DateInvoiced" name="BirthDate" placeholder="mm/dd/yyyy" autocomplete="off" required value="<?php echo date_format(date_create($res->BirthDate), 'm/d/Y'); ?>" />
-          <span class="input-group-addon"><i class="fa fa-th"></i></span>
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label" for="Fname">First Name <span class="required">*</span></label>
+          <input class="form-control" id="Fname" name="Fname" placeholder="e.g. Ahmed" type="text" value="<?php echo htmlspecialchars($res->Fname); ?>" autocomplete="off" required>
+          <div class="invalid-feedback">First name is required.</div>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label" for="Mname">Middle Name</label>
+          <input class="form-control" id="Mname" name="Mname" placeholder="Optional" type="text" value="<?php echo htmlspecialchars($res->Mname); ?>" autocomplete="off">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label" for="Lname">Last Name <span class="required">*</span></label>
+          <input class="form-control" id="Lname" name="Lname" placeholder="e.g. Hassan" type="text" value="<?php echo htmlspecialchars($res->Lname); ?>" autocomplete="off" required>
+          <div class="invalid-feedback">Last name is required.</div>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label" for="Sex">Sex <span class="required">*</span></label>
+          <select class="form-select" id="Sex" name="Sex" required>
+            <option value="">Select sex</option>
+            <option value="Male" <?php echo ($res->Sex === 'Male') ? 'selected' : ''; ?>>Male</option>
+            <option value="Female" <?php echo ($res->Sex === 'Female') ? 'selected' : ''; ?>>Female</option>
+          </select>
+          <div class="invalid-feedback">Please select sex.</div>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label" for="BirthDate">Date of Birth <span class="required">*</span></label>
+          <div class="input-group date" data-provide="datepicker" data-date-format="mm/dd/yyyy">
+            <span class="input-group-text"><i class="bi bi-calendar3"></i></span>
+            <input type="text" class="form-control date_picker" id="BirthDate" name="BirthDate" placeholder="mm/dd/yyyy" autocomplete="off" required value="<?php echo htmlspecialchars($birthDateValue); ?>">
+          </div>
+          <div class="invalid-feedback">Valid birth date is required (patient must be at least 1 year old).</div>
+          <div class="form-hint">
+            <i class="bi bi-info-circle"></i>
+            <span>Patient must be at least 1 year old.</span>
+          </div>
+          <div class="age-preview d-none" id="agePreview">
+            <i class="bi bi-hourglass-split"></i>
+            <span id="agePreviewText"></span>
+          </div>
+        </div>
+        <div class="col-md-12">
+          <label class="form-label" for="F_Address">Address <span class="required">*</span></label>
+          <textarea class="form-control" id="F_Address" name="F_Address" placeholder="Street, city, area..." rows="2" autocomplete="off" required><?php echo htmlspecialchars($res->F_Address); ?></textarea>
+          <div class="invalid-feedback">Address is required.</div>
         </div>
       </div>
     </div>
   </div>
 
+  <div class="form-page-card">
+    <div class="card-header">
+      <i class="bi bi-telephone"></i> Contact Information
+    </div>
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label" for="ContactNo">Contact Number <span class="required">*</span></label>
+          <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-phone"></i></span>
+            <input class="form-control" id="ContactNo" name="ContactNo" placeholder="10-digit number" type="tel" inputmode="numeric" maxlength="10" pattern="[0-9]{10}" autocomplete="off" required value="<?php echo htmlspecialchars($res->ContactNo); ?>">
+          </div>
+          <div class="invalid-feedback">Contact number must be exactly 10 digits.</div>
+        </div>
+      </div>
 
-  <div class="form-group">
-    <div class="col-md-8">
-      <label class="col-md-4 control-label" for="ContactNo">Contact No.:</label>
-
-      <div class="col-md-8">
-        <input class="form-control input-sm" id="ContactNo" name="ContactNo" placeholder="Contact No." type="text" maxlength="11" value="<?php echo $res->ContactNo; ?>" autocomplete="none">
+      <div class="form-actions">
+        <button class="btn btn-primary" name="save" type="submit">
+          <i class="bi bi-check-lg"></i> Update Patient
+        </button>
+        <a href="index.php" class="btn btn-outline-secondary">
+          <i class="bi bi-x-lg"></i> Cancel
+        </a>
       </div>
     </div>
   </div>
-
-
-
-  <div class="form-group">
-    <div class="col-md-8">
-      <label class="col-md-4 control-label" for="idno"></label>
-
-      <div class="col-md-8">
-        <button class="btn btn-primary btn-md" name="save" type="submit"><span class="fa fa-save fw-fa"></span> Save</button>
-        <a href="index.php" class="btn btn-default"><span class="glyphicon glyphicon-arrow-left"></span>&nbsp;<strong>Back</strong></a>
-      </div>
-    </div>
-  </div>
-
-
 
 </form>
 
+<script>
+(function () {
+  var form = document.getElementById('patientForm');
+  var birthInput = document.getElementById('BirthDate');
+  var contactInput = document.getElementById('ContactNo');
+  var agePreview = document.getElementById('agePreview');
+  var agePreviewText = document.getElementById('agePreviewText');
 
-<!-- <script type="text/javascript" src=" https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>  
-  <script type="text/javascript">
-    var map = null;
-    var directionsDisplay = null;
-    var directionsService = null;
-    function initialize() {
-        
-      var input = document.getElementById('S_Address');
-      var searchBox = new google.maps.places.SearchBox(input); 
+  function capitalizeWords(value) {
+    return value.replace(/\b\w/g, function (ch) { return ch.toUpperCase(); });
+  }
 
-       var input = document.getElementById('F_Address');
-      var searchBox = new google.maps.places.SearchBox(input); 
-    } 
-    $(document).ready(function() {
-        initialize();
+  function parseBirthDate(value) {
+    var parts = value.split('/');
+    if (parts.length !== 3) return null;
+    var month = parseInt(parts[0], 10);
+    var day = parseInt(parts[1], 10);
+    var year = parseInt(parts[2], 10);
+    if (!month || !day || !year) return null;
+    var date = new Date(year, month - 1, day);
+    if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) {
+      return null;
+    }
+    return date;
+  }
+
+  function calculateAge(birthDate) {
+    var today = new Date();
+    var age = today.getFullYear() - birthDate.getFullYear();
+    var monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  }
+
+  function updateAgePreview() {
+    var birth = parseBirthDate(birthInput.value.trim());
+    if (!birth) {
+      agePreview.classList.add('d-none');
+      return;
+    }
+    var age = calculateAge(birth);
+    agePreview.classList.remove('d-none');
+    if (age < 1) {
+      agePreview.classList.add('is-invalid-age');
+      agePreviewText.textContent = 'Age: ' + age + ' year(s) — must be at least 1 year old';
+    } else {
+      agePreview.classList.remove('is-invalid-age');
+      agePreviewText.textContent = 'Calculated age: ' + age + ' year(s)';
+    }
+  }
+
+  function setFieldState(field, isValid, message) {
+    field.classList.toggle('is-invalid', !isValid);
+    var feedback = field.closest('.col-md-4, .col-md-6, .col-md-12')?.querySelector('.invalid-feedback');
+    if (feedback && message) {
+      feedback.textContent = message;
+    }
+  }
+
+  function validateBirthDate() {
+    var value = birthInput.value.trim();
+    if (!value) {
+      setFieldState(birthInput, false, 'Birth date is required.');
+      return false;
+    }
+    var birth = parseBirthDate(value);
+    if (!birth) {
+      setFieldState(birthInput, false, 'Use format mm/dd/yyyy.');
+      return false;
+    }
+    var age = calculateAge(birth);
+    if (age < 1) {
+      setFieldState(birthInput, false, 'Patient must be at least 1 year old.');
+      return false;
+    }
+    setFieldState(birthInput, true);
+    return true;
+  }
+
+  function validateContact() {
+    var value = contactInput.value.replace(/\D/g, '');
+    contactInput.value = value;
+    if (value.length !== 10) {
+      setFieldState(contactInput, false, 'Contact number must be exactly 10 digits.');
+      return false;
+    }
+    setFieldState(contactInput, true);
+    return true;
+  }
+
+  function shakeField(field) {
+    field.classList.add('form-shake');
+    setTimeout(function () { field.classList.remove('form-shake'); }, 400);
+  }
+
+  ['Fname', 'Lname', 'Mname'].forEach(function (id) {
+    var field = document.getElementById(id);
+    field.addEventListener('blur', function () {
+      field.value = capitalizeWords(field.value.trim());
     });
- 
-  </script>   
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDTanm_xZQi4_RHeCAxerOqXN96NUwrbZU&libraries=places"> </script> -->
+  });
+
+  contactInput.addEventListener('input', function () {
+    contactInput.value = contactInput.value.replace(/\D/g, '').slice(0, 10);
+    if (contactInput.classList.contains('is-invalid')) {
+      validateContact();
+    }
+  });
+
+  birthInput.addEventListener('change', function () {
+    updateAgePreview();
+    if (birthInput.classList.contains('is-invalid')) {
+      validateBirthDate();
+    }
+  });
+
+  birthInput.addEventListener('keyup', updateAgePreview);
+
+  form.addEventListener('submit', function (e) {
+    var isValid = true;
+
+    ['Fname', 'Lname', 'Sex', 'F_Address'].forEach(function (id) {
+      var field = document.getElementById(id);
+      var empty = !field.value.trim();
+      field.classList.toggle('is-invalid', empty);
+      if (empty) {
+        isValid = false;
+        shakeField(field);
+      }
+    });
+
+    if (!validateBirthDate()) {
+      isValid = false;
+      shakeField(birthInput);
+    }
+
+    if (!validateContact()) {
+      isValid = false;
+      shakeField(contactInput);
+    }
+
+    if (!isValid) {
+      e.preventDefault();
+      var firstInvalid = form.querySelector('.is-invalid');
+      if (firstInvalid) {
+        firstInvalid.focus();
+        firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+  });
+
+  form.querySelectorAll('.form-control, .form-select').forEach(function (field) {
+    field.addEventListener('input', function () {
+      if (field.classList.contains('is-invalid') && field.value.trim()) {
+        field.classList.remove('is-invalid');
+      }
+    });
+    field.addEventListener('change', function () {
+      if (field.classList.contains('is-invalid') && field.value.trim()) {
+        field.classList.remove('is-invalid');
+      }
+    });
+  });
+
+  if (birthInput.value.trim()) {
+    updateAgePreview();
+  }
+})();
+</script>

@@ -43,46 +43,43 @@ function doSavePrescription()
         redirect("index.php");
         return;
     }
-    // يجب أن يأتي user_id من جلسة تسجيل الدخول، وليس بالضرورة من النموذج
-    $user_id = (int)$_SESSION['ADMIN_USERID']; 
+    $user_id = $mydb->escape_value($_SESSION['ADMIN_USERID']);
     
     $presc_id       = isset($_POST['presc_id']) ? (int)$_POST['presc_id'] : 0;
     
     // إذا لم يكن ID الوصفة صفرًا، فهناك خطأ، هذه الدالة للإضافة فقط
     if ($presc_id != 0) {
          message("Error: Attempting to save a new record in the update function context.", "error");
-         redirect("index.php?view=list");
+         redirect("index.php?view=prescriptions");
          return;
     }
 
-    // 2. جلب وتجهيز البيانات
     $patient_id     = (int)$_POST['patient_id'];
-    $medicine_name  = $_POST['medicine_name'];
-    $dosage         = $_POST['dosage'];
-    $timing         = $_POST['timing'] ?? '';
-    $medical_advice = $_POST['medical_advice'] ?? '';
+    $medicine_name  = $mydb->escape_value($_POST['medicine_name']);
+    $dosage         = $mydb->escape_value($_POST['dosage']);
+    $timing         = $mydb->escape_value($_POST['timing'] ?? '');
+    $medical_advice = $mydb->escape_value($_POST['medical_advice'] ?? '');
 
-    // 3. توليد الرقم التسلسلي الجديد
+    // Reserve the next prescription number before insert
     $autonum = new Autonumber();
     $res = $autonum->set_autonumber('PRESCRIPTION');
     $prescription_no = ($res && !empty($res->AUTO)) ? $res->AUTO : 'PRESC_001';
+    $autonum->auto_update('PRESCRIPTION');
     
     // 4. بناء استعلام INSERT
     $sql = "INSERT INTO prescriptions 
             (patient_id, user_id, medicine_name, dosage, timing, medical_advice, prescription_no, created_at)
             VALUES 
-            ({$patient_id}, {$user_id}, '{$medicine_name}', '{$dosage}', '{$timing}', '{$medical_advice}', '{$prescription_no}', NOW())";
+            ({$patient_id}, '{$user_id}', '{$medicine_name}', '{$dosage}', '{$timing}', '{$medical_advice}', '{$prescription_no}', NOW())";
 
-    // 5. التنفيذ والتحديث
+    // 5. التنفيذ
     $mydb->setQuery($sql);
     if ($mydb->executeQuery()) {
-        // ⭐ تحديث العداد بعد نجاح الإضافة (لحل مشكلة التكرار)
-        $autonum->auto_update('PRESCRIPTION'); 
         message("Prescription saved successfully!", "success");
     } else {
         message("Failed to save prescription. Database Error.", "error"); 
     }
-    redirect("index.php?view=list");
+    redirect("index.php?view=prescriptions");
 }
 
 /**
@@ -105,24 +102,24 @@ function doUpdatePrescription()
 
     if ($presc_id <= 0) {
         message("Invalid Prescription ID for update.", "error");
-        redirect("index.php?view=list");
+        redirect("index.php?view=prescriptions");
         return;
     }
 
     // 3. جلب وتجهيز البيانات
     $patient_id     = (int)$_POST['patient_id'];
-    $user_id        = (int)$_POST['user_id']; 
-    $prescription_no = $_POST['prescription_no']; // الحفاظ على الرقم الحالي
+    $user_id        = $mydb->escape_value($_POST['user_id']);
+    $prescription_no = $mydb->escape_value($_POST['prescription_no']);
 
-    $medicine_name  = $_POST['medicine_name'];
-    $dosage         = $_POST['dosage'];
-    $timing         = $_POST['timing'] ?? '';
-    $medical_advice = $_POST['medical_advice'] ?? '';
+    $medicine_name  = $mydb->escape_value($_POST['medicine_name']);
+    $dosage         = $mydb->escape_value($_POST['dosage']);
+    $timing         = $mydb->escape_value($_POST['timing'] ?? '');
+    $medical_advice = $mydb->escape_value($_POST['medical_advice'] ?? '');
 
     // 4. بناء استعلام UPDATE
     $sql = "UPDATE prescriptions SET 
                 patient_id = {$patient_id},
-                user_id = {$user_id},
+                user_id = '{$user_id}',
                 medicine_name = '{$medicine_name}',
                 dosage = '{$dosage}',
                 timing = '{$timing}',
@@ -138,7 +135,7 @@ function doUpdatePrescription()
         message("Failed to update prescription. Database Error.", "error"); 
     }
     
-    redirect("index.php?view=list");
+    redirect("index.php?view=prescriptions");
 }
 
 /**
@@ -151,14 +148,14 @@ function doDeletePrescription()
     // التحقق من الصلاحيات (يفترض أن يكون للمسؤول/الطبيب فقط)
     if ($_SESSION['ADMIN_ROLE'] != 'Administrator' && $_SESSION['ADMIN_ROLE'] != 'doctor') {
         message("You do not have permission to delete prescriptions.", "error");
-        redirect("index.php?view=list");
+        redirect("index.php?view=prescriptions");
         return;
     }
 
     $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
     if ($id <= 0) {
         message("Invalid prescription ID.", "error");
-        redirect("index.php?view=list");
+        redirect("index.php?view=prescriptions");
         return;
     }
 
@@ -167,5 +164,5 @@ function doDeletePrescription()
     $mydb->executeQuery();
 
     message("Prescription has been deleted successfully!", "success");
-    redirect("index.php?view=list");
+    redirect("index.php?view=prescriptions");
 }

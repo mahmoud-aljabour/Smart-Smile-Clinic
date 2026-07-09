@@ -9,6 +9,7 @@ if (!isset($_SESSION['ADMIN_USERID'])) {
 $view = (isset($_GET['view']) && $_GET['view'] != '') ? $_GET['view'] : '';
 $title = "Invoices";
 $header = $view;
+$documentTitle = null;
 $viewLabels = array(
 	'list' => 'Invoices',
 	'add' => 'Create Invoice',
@@ -23,6 +24,7 @@ switch ($view) {
 
 	case 'add':
 		$content    = 'add.php';
+		$pageScript = __DIR__ . '/add-scripts.php';
 		break;
 
 	case 'edit':
@@ -30,6 +32,14 @@ switch ($view) {
 		break;
 	case 'view':
 		$content    = 'view.php';
+		if (!empty($_GET['id'])) {
+			$invnoTitle = $_GET['id'];
+			$mydb->setQuery("SELECT Patients FROM tblpayments WHERE Class='Invoice' AND InvoiceNo='{$invnoTitle}'");
+			$payTitle = $mydb->loadSingleResult();
+			if ($payTitle) {
+				$documentTitle = invoice_file_label($invnoTitle, $payTitle->Patients ?? '');
+			}
+		}
 		break;
 
 	default:

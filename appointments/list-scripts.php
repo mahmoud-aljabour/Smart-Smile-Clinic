@@ -32,11 +32,21 @@
       return;
     }
 
-    var daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-
     $('#calendar').fullCalendar({
       eventOrder: "eventOrder",
       editable: true,
+      height: 'auto',
+      contentHeight: 680,
+      aspectRatio: 1.55,
+      eventLimit: 3,
+      eventColor: '#0ea5e9',
+      eventBorderColor: '#0284c7',
+      eventTextColor: '#ffffff',
+      views: {
+        month: {
+          eventLimit: 3
+        }
+      },
       header: {
         left: 'prev,next today',
         center: 'title',
@@ -50,16 +60,18 @@
         end: $.fullCalendar.moment().startOf('month').add(1, 'month')
       },
       dayRender: function(date, cell) {
-        var dayOfWeek = date.day();
-        var dayName = daysOfWeek[dayOfWeek];
-        if (cell.find('.day-name').length === 0) {
-          cell.append('<span class="day-name">' + dayName + '</span>');
-        }
-        if (dayOfWeek === 5) {
-          cell.css('background-color', 'lightcoral');
-          cell.css('color', 'black');
-          cell.addClass('friday');
+        if (date.day() === 5) {
+          cell.addClass('friday-closed');
           cell.attr('title', 'Friday: Not available for bookings');
+          if (cell.find('.fc-day-closed-label').length === 0) {
+            cell.append('<span class="fc-day-closed-label">Closed</span>');
+          }
+        }
+      },
+      eventRender: function(event, element) {
+        if (event.start) {
+          var timeText = $.fullCalendar.formatDate(event.start, 'h:mm A');
+          element.find('.fc-title').prepend('<span class="fc-event-time-label">' + timeText + '</span> ');
         }
       },
       select: function(start) {

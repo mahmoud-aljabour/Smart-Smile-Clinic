@@ -347,13 +347,17 @@ function doLoadEvents()
     foreach ($result as $row) {
         // تنسيق البيانات لتناسب العرض في التقويم (FullCalendar مثلاً)
         $full_name = trim($row->Fname . ' ' . $row->Lname);
-        $title_display = $full_name . ' - ' . $row->Services . ' (' . $row->A_Time . ')';
+        $title_display = $full_name . ' · ' . $row->Services;
 
         $data[] = array(
-            'id'    => $row->AppoinmentID, // المعرّف
-            'title' => $title_display,      // العنوان الظاهر في التقويم
-            'start' => $row->A_Date . ' ' . $row->A_Time, // تاريخ ووقت البداية
-            'end'   => $row->A_Date . ' ' . $row->A_Time  // لكي يظهر كنقطة (Event dot)
+            'id'    => $row->AppoinmentID,
+            'title' => $title_display,
+            'start' => $row->A_Date . ' ' . $row->A_Time,
+            'end'   => $row->A_Date . ' ' . $row->A_Time,
+            'backgroundColor' => '#0ea5e9',
+            'borderColor' => '#0284c7',
+            'textColor' => '#ffffff',
+            'className' => 'appointment-event'
         );
     }
 

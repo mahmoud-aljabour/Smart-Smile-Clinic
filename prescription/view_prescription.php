@@ -30,45 +30,12 @@ if (!$prescription) {
 $created_at = date_format(date_create($prescription->created_at), "m/d/Y");
 $prescriptionNo = !empty($prescription->prescription_no) ? $prescription->prescription_no : ('PRESC_' . $prescription->id);
 $doctorName = !empty($prescription->doctor_name) ? $prescription->doctor_name : 'Not assigned';
+$patientDisplayName = trim($prescription->patient_name);
 
 $sql = "SELECT * FROM tplprintprescriptions LIMIT 1";
 $mydb->setQuery($sql);
 $print_data = $mydb->loadSingleResult();
-
-$header1 = htmlspecialchars($print_data->header1 ?? 'Smart Smile Clinic');
-$header2 = htmlspecialchars($print_data->header2 ?? '');
-$header3 = htmlspecialchars($print_data->header3 ?? '');
-$footer1 = htmlspecialchars($print_data->footer1 ?? '');
-$footer2 = htmlspecialchars($print_data->footer2 ?? '');
-$footer3 = htmlspecialchars($print_data->footer3 ?? '');
 ?>
-
-<style>
-  @media print {
-    .no-print,
-    .no-print * {
-      display: none !important;
-    }
-
-    .prescription-view-page {
-      background: #fff !important;
-      border: none !important;
-      box-shadow: none !important;
-      padding: 0 !important;
-    }
-
-    .prescription-view-page::before,
-    .prescription-view-page::after {
-      display: none !important;
-    }
-
-    .form-page-card {
-      background: #fff !important;
-      border: 1px solid #ddd !important;
-      box-shadow: none !important;
-    }
-  }
-</style>
 
 <div class="page-header-bar no-print">
   <div>
@@ -84,102 +51,94 @@ $footer3 = htmlspecialchars($print_data->footer3 ?? '');
         <i class="bi bi-pencil"></i> Edit
       </a>
     <?php endif; ?>
-    <a href="printprescription.php?id=<?php echo $presc_id; ?>" class="btn btn-outline-primary" target="_blank">
-      <i class="bi bi-box-arrow-up-right"></i> Print Page
-    </a>
     <button type="button" onclick="window.print()" class="btn btn-primary">
-      <i class="bi bi-printer"></i> Print
+      <i class="bi bi-printer"></i> Print Prescription
     </button>
   </div>
 </div>
 
-<div id="prescription-view-area" class="form-add-page prescription-view-page invoice-view-page">
+<div id="prescription-view-area" class="prescription-document-page invoice-document-page">
 
-  <div class="invoice-print-header text-center mb-4">
-    <div class="line-main"><?php echo $header1; ?></div>
-    <div class="line-sub"><?php echo $header2; ?></div>
-    <div class="line-sub"><?php echo $header3; ?></div>
+  <div class="invoice-print-header">
+    <div class="line-doc">Prescription</div>
+    <div class="line-main"><?php echo htmlspecialchars($print_data->header1 ?? app_name); ?></div>
+    <?php if (!empty($print_data->header2)): ?>
+      <div class="line-sub"><?php echo htmlspecialchars($print_data->header2); ?></div>
+    <?php endif; ?>
+    <?php if (!empty($print_data->header3)): ?>
+      <div class="line-sub"><?php echo htmlspecialchars($print_data->header3); ?></div>
+    <?php endif; ?>
   </div>
 
-  <div class="row g-4 mb-4">
-    <div class="col-lg-6">
-      <div class="form-page-card h-100">
-        <div class="card-header">
-          <i class="bi bi-person-vcard"></i> Patient
-        </div>
-        <div class="card-body">
-          <div class="patient-info-card">
-            <div class="info-item full-width">
-              <span class="info-label">Patient Name</span>
-              <span class="info-value"><?php echo htmlspecialchars(trim($prescription->patient_name)); ?></span>
-            </div>
-            <div class="info-item">
-              <span class="info-label">Age</span>
-              <span class="info-value"><?php echo (int)$prescription->Age; ?> years</span>
-            </div>
-            <div class="info-item">
-              <span class="info-label">Gender</span>
-              <span class="info-value"><?php echo htmlspecialchars($prescription->Sex); ?></span>
-            </div>
-            <div class="info-item full-width">
-              <span class="info-label">Address</span>
-              <span class="info-value"><?php echo htmlspecialchars($prescription->address); ?></span>
-            </div>
-            <div class="info-item">
-              <span class="info-label">Phone</span>
-              <span class="info-value"><?php echo htmlspecialchars($prescription->patient_phone); ?></span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-lg-6">
-      <div class="form-page-card h-100">
-        <div class="card-header">
-          <i class="bi bi-file-earmark-medical"></i> Prescription Information
-        </div>
-        <div class="card-body">
-          <div class="patient-info-card">
-            <div class="info-item">
-              <span class="info-label">Prescription ID</span>
-              <span class="info-value"><?php echo htmlspecialchars($prescriptionNo); ?></span>
-            </div>
-            <div class="info-item">
-              <span class="info-label">Issue Date</span>
-              <span class="info-value"><?php echo htmlspecialchars($created_at); ?></span>
-            </div>
-            <div class="info-item full-width">
-              <span class="info-label">Doctor</span>
-              <span class="info-value"><?php echo htmlspecialchars($doctorName); ?></span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="form-page-card mb-4">
-    <div class="card-header">
-      <i class="bi bi-capsule"></i> Medicine Details
-    </div>
+  <div class="content-card invoice-print-area">
     <div class="card-body">
-      <div class="table-responsive">
-        <table class="table table-modern table-hover table-bordered mb-0">
+      <div class="invoice-doc-head text-center mb-4">
+        <div class="invoice-doc-type">Prescription</div>
+        <div class="invoice-doc-number"><?php echo htmlspecialchars($prescriptionNo); ?></div>
+      </div>
+
+      <div class="invoice-info-grid mb-4">
+        <div class="invoice-info-block">
+          <h3 class="invoice-block-title">Patient</h3>
+          <div class="invoice-detail-list">
+            <div class="invoice-detail-item full-width">
+              <span class="detail-label">Patient Name</span>
+              <span class="detail-value"><?php echo htmlspecialchars($patientDisplayName); ?></span>
+            </div>
+            <div class="invoice-detail-item">
+              <span class="detail-label">Age</span>
+              <span class="detail-value"><?php echo (int)$prescription->Age; ?> years</span>
+            </div>
+            <div class="invoice-detail-item">
+              <span class="detail-label">Gender</span>
+              <span class="detail-value"><?php echo htmlspecialchars($prescription->Sex); ?></span>
+            </div>
+            <div class="invoice-detail-item full-width">
+              <span class="detail-label">Address</span>
+              <span class="detail-value"><?php echo htmlspecialchars($prescription->address); ?></span>
+            </div>
+            <div class="invoice-detail-item">
+              <span class="detail-label">Phone</span>
+              <span class="detail-value"><?php echo htmlspecialchars($prescription->patient_phone); ?></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="invoice-info-block">
+          <h3 class="invoice-block-title">Prescription Details</h3>
+          <div class="invoice-detail-list">
+            <div class="invoice-detail-item">
+              <span class="detail-label">Prescription No.</span>
+              <span class="detail-value"><?php echo htmlspecialchars($prescriptionNo); ?></span>
+            </div>
+            <div class="invoice-detail-item">
+              <span class="detail-label">Issue Date</span>
+              <span class="detail-value"><?php echo htmlspecialchars($created_at); ?></span>
+            </div>
+            <div class="invoice-detail-item full-width">
+              <span class="detail-label">Doctor</span>
+              <span class="detail-value"><?php echo htmlspecialchars($doctorName); ?></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="invoice-table-wrap">
+        <table class="table table-modern table-bordered invoice-doc-table prescription-doc-table mb-0">
           <thead>
             <tr>
-              <th width="22%">Medicine Name</th>
-              <th width="22%">Dosage</th>
-              <th width="18%">Timing</th>
-              <th>Medical Advice</th>
+              <th class="col-medicine">Medicine Name</th>
+              <th class="col-dosage">Dosage</th>
+              <th class="col-timing">Timing</th>
+              <th class="col-advice">Medical Advice</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td><?php echo htmlspecialchars($prescription->medicine_name); ?></td>
-              <td><?php echo htmlspecialchars($prescription->dosage); ?></td>
-              <td><?php echo htmlspecialchars($prescription->timing ?: 'Not specified'); ?></td>
-              <td><?php echo nl2br(htmlspecialchars($prescription->medical_advice ?: '—')); ?></td>
+              <td class="col-medicine"><?php echo htmlspecialchars($prescription->medicine_name); ?></td>
+              <td class="col-dosage"><?php echo htmlspecialchars($prescription->dosage); ?></td>
+              <td class="col-timing"><?php echo htmlspecialchars($prescription->timing ?: 'Not specified'); ?></td>
+              <td class="col-advice"><?php echo nl2br(htmlspecialchars($prescription->medical_advice ?: '—')); ?></td>
             </tr>
           </tbody>
         </table>
@@ -187,10 +146,16 @@ $footer3 = htmlspecialchars($print_data->footer3 ?? '');
     </div>
   </div>
 
-  <div class="invoice-print-footer text-center">
-    <div class="line-sub"><?php echo $footer1; ?></div>
-    <div class="line-sub"><?php echo $footer2; ?></div>
-    <div class="line-sub"><?php echo $footer3; ?></div>
+  <div class="invoice-print-footer">
+    <?php if (!empty($print_data->footer1)): ?>
+      <div class="line-sub"><?php echo htmlspecialchars($print_data->footer1); ?></div>
+    <?php endif; ?>
+    <?php if (!empty($print_data->footer2)): ?>
+      <div class="line-sub"><?php echo htmlspecialchars($print_data->footer2); ?></div>
+    <?php endif; ?>
+    <?php if (!empty($print_data->footer3)): ?>
+      <div class="line-sub"><?php echo htmlspecialchars($print_data->footer3); ?></div>
+    <?php endif; ?>
   </div>
 
 </div>

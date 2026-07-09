@@ -1,62 +1,70 @@
 <?php
 if (!isset($_SESSION['ADMIN_USERID'])) {
-    redirect(web_root . "login.php");
+  redirect(web_root . "login.php");
 }
+
+$currency = $setDefault->default_currency();
 ?>
-<style type="text/css">
-    .table {
-        white-space: nowrap;
-    }
-</style>
-<div class="row">
-    <div class="col-lg-12">
-        <h1 class="page-header"><a href="index.php?view=add" class="btn btn-primary btn-md  "> <i class="fa fa-plus-circle fw-fa"></i> Add New Service</a> </h1>
-    </div>
-    <!-- /.col-lg-12 -->
+
+<div class="page-header-bar">
+  <div>
+    <h1 class="h3 mb-1">Services</h1>
+    <p class="text-muted small mb-0">Manage dental services, pricing, and tooth mapping</p>
+  </div>
+  <a href="index.php?view=add" class="btn btn-primary">
+    <i class="bi bi-plus-circle me-1"></i> Add Service
+  </a>
 </div>
 
-<div class="table-responsive">
-    <form class="wow fadeInDownaction" action="controller.php?action=delete" Method="POST">
-        <table id="dash-table" class="table table-striped table-bordered  table-hover  mytbl" style="font-size:12px" cellspacing="0">
-            <thead>
-                <tr>
-                    <th>Services ID</th>
-                    <th>Tooth Number</th>
-                    <th>Age Group</th>
-                    <th>Services</th>
-                    <th>Description</th>
-                    <th>Price</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php
-                // Updated SQL with JOIN to show age group description
-                $sql = "SELECT s.*, ag.Description as AgeGroupDesc 
-                        FROM `tblservices` s 
-                        LEFT JOIN `tbl_age_groups` ag ON s.AgeGroupID = ag.AgeGroupID 
-                        ORDER BY s.SKU DESC";
+<div class="content-card">
+  <div class="card-body">
+    <form action="controller.php?action=delete" method="POST">
+      <div class="table-responsive">
+        <table id="dash-table" class="table table-modern table-hover table-bordered" cellspacing="0">
+          <thead>
+            <tr>
+              <th>Service ID</th>
+              <th>Service Name</th>
+              <th>Age Group</th>
+              <th>Tooth Number</th>
+              <th>Description</th>
+              <th class="text-end">Price (<?php echo htmlspecialchars($currency); ?>)</th>
+              <th width="14%" class="text-center">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <?php
+            $sql = "SELECT s.*, ag.Description AS AgeGroupDesc
+                    FROM `tblservices` s
+                    LEFT JOIN `tbl_age_groups` ag ON s.AgeGroupID = ag.AgeGroupID
+                    ORDER BY s.SKU DESC";
+            $mydb->setQuery($sql);
+            $cur = $mydb->loadResultList();
 
-                $mydb->setQuery($sql);
-                $cur = $mydb->loadResultList();
-
-                foreach ($cur as $result) {
-                    echo '<tr>';
-                    echo '<td>' . $result->SKU . '</td>';
-                    echo '<td>' . $result->ToothNumber . '</td>';
-                    echo '<td>' . ($result->AgeGroupDesc ? $result->AgeGroupDesc : 'Not Specified') . '</td>';
-                    echo '<td>' . $result->Services . '</td>';
-                    echo '<td>' . $result->Description . '</td>';
-                    echo '<td> ' . $setDefault->default_currency() . ' ' . number_format($result->OriginalPrice, 2) . '</td>';
-                    echo '<td align="center" >   
-                                    <a title="Edit" href="index.php?view=edit&id=' . $result->SKU . '"  class="btn btn-info btn-md  "><span class="fa fa-edit fw-fa"></span>Edit</a>  
-                                    <a title="Remove" href="controller.php?action=delete&id=' . $result->SKU . '"  class="btn btn-danger btn-md  ">
-                                    <span class="fa fa-trash-o fw-fa"></span>Remove</a> 
-                                 </td>';
-                    echo '</tr>';
-                }
-                ?>
-            </tbody>
+            if (empty($cur)) {
+              echo '<tr><td colspan="7" class="text-center text-muted py-4">No services found. Add your first service to get started.</td></tr>';
+            } else {
+              foreach ($cur as $result) {
+                $ageGroup = $result->AgeGroupDesc ? $result->AgeGroupDesc : 'Not Specified';
+                echo '<tr>';
+                echo '<td>' . htmlspecialchars($result->SKU) . '</td>';
+                echo '<td>' . htmlspecialchars($result->Services) . '</td>';
+                echo '<td>' . htmlspecialchars($ageGroup) . '</td>';
+                echo '<td>' . htmlspecialchars($result->ToothNumber) . '</td>';
+                echo '<td>' . htmlspecialchars($result->Description) . '</td>';
+                echo '<td class="text-end">' . number_format($result->OriginalPrice, 2) . '</td>';
+                echo '<td class="text-center text-nowrap">';
+                echo '<a title="View" href="index.php?view=view&id=' . urlencode($result->SKU) . '" class="btn btn-sm btn-outline-primary btn-action me-1"><i class="bi bi-eye"></i></a>';
+                echo '<a title="Edit" href="index.php?view=edit&id=' . urlencode($result->SKU) . '" class="btn btn-sm btn-outline-secondary btn-action me-1"><i class="bi bi-pencil"></i></a>';
+                echo '<a title="Delete" href="controller.php?action=delete&id=' . urlencode($result->SKU) . '" class="btn btn-sm btn-outline-danger btn-action"><i class="bi bi-trash"></i></a>';
+                echo '</td>';
+                echo '</tr>';
+              }
+            }
+            ?>
+          </tbody>
         </table>
+      </div>
     </form>
+  </div>
 </div>

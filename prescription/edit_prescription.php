@@ -1,138 +1,183 @@
 <?php
-require_once("../include/initialize.php");
 if (!isset($_SESSION['ADMIN_USERID'])) {
-    redirect(web_root . "admin/index.php");
+  redirect(web_root . "login.php");
 }
 
-// ------------------------------------------------------------------
-// 1. جلب بيانات الوصفة الطبية الحالية
-// ------------------------------------------------------------------
+global $mydb;
 
-// $presc_id = $_GET['presc_id'];
-// $client = new Patients();
-// $res = $client->single_patient($PatientID);
-
- 
-global $mydb; 
-
-// 1. جلب ID الوصفة من الرابط (Query String) والتحقق منه فوراً
-// ⭐ ملاحظة: إذا كان المتغير $presc_id غير مُعرَّف، فسيتم تعيينه إلى 0
 $presc_id = isset($_GET['presc_id']) ? (int)$_GET['presc_id'] : 0;
-
-// التحقق من صلاحية ID
-if ($presc_id == 0) {
-    message("Invalid Prescription ID. Could not find ID in URL.", "error");
-    redirect("index.php?view=list");
-    // يجب وضع 'exit;' أو 'return;' هنا لضمان عدم استمرار تنفيذ الكود
-    exit; 
+if ($presc_id <= 0) {
+  message("Invalid prescription ID.", "error");
+  redirect("index.php?view=prescriptions");
 }
 
-
-// 2. جلب تفاصيل الوصفة بناءً على ID
-// هذا هو السطر الذي كان يسبب الخطأ في الاستعلام
 $sql_presc = "SELECT * FROM prescriptions WHERE id = {$presc_id}";
 $mydb->setQuery($sql_presc);
 $prescription = $mydb->loadSingleResult();
 
 if (!$prescription) {
-    message("Prescription not found.", "error");
-    redirect("index.php?view=list");
-    exit;
+  message("Prescription not found.", "error");
+  redirect("index.php?view=prescriptions");
 }
 
-// 3. جلب المرضى للقائمة المنسدلة
-$sql_patients = "SELECT PatientID, CONCAT(Fname, ' ' , Mname , ' ' , Lname) AS patient_name FROM tblpatients ORDER BY Fname ASC";
+$sql_patients = "SELECT PatientID, CONCAT(Fname, ' ', Mname, ' ', Lname) AS patient_name FROM tblpatients ORDER BY Fname ASC";
 $mydb->setQuery($sql_patients);
 $patients = $mydb->loadResultList();
 
-
+$prescriptionNo = !empty($prescription->prescription_no) ? $prescription->prescription_no : ('PRESC_' . $prescription->id);
 ?>
 
- 
-<div class="center wow fadeInDown">
-    <h2 class="page-header">Edit Prescription </h2>
+<div class="page-header-bar">
+  <div>
+    <h1 class="h3 mb-1">Edit Prescription</h1>
+    <p class="text-muted small mb-0"><?php echo htmlspecialchars($prescriptionNo); ?></p>
+  </div>
+  <a href="index.php?view=prescriptions" class="btn btn-outline-secondary">
+    <i class="bi bi-arrow-left"></i> Back to List
+  </a>
 </div>
 
-<form class="form-horizontal span6 wow fadeInDown" action="controller.php?action=edit_prescription" method="POST" enctype="multipart/form-data" autocomplete="off">
+<form action="controller.php?action=edit_prescription" method="POST" enctype="multipart/form-data" autocomplete="off" id="prescriptionForm" class="form-add-page" novalidate>
 
-    <input type="hidden" name="presc_id" value="<?= htmlspecialchars($prescription->id) ?>">
-    <input type="hidden" name="prescription_no" value="<?= htmlspecialchars($prescription->prescription_no) ?>">
-    <input type="hidden" name="user_id" value="<?= htmlspecialchars($prescription->user_id) ?>">
+  <input type="hidden" name="presc_id" value="<?php echo (int)$prescription->id; ?>">
+  <input type="hidden" name="prescription_no" value="<?php echo htmlspecialchars($prescription->prescription_no); ?>">
+  <input type="hidden" name="user_id" value="<?php echo htmlspecialchars($prescription->user_id); ?>">
 
-    <div class="form-group">
-        <div class="col-md-8">
-            <label class="col-md-4 control-label" for="PrescriptionNo">Prescription IDs:</label>
-            <div class="col-md-8">
-                <input class="form-control input-sm" id="PrescriptionNo" type="text" 
-                       value="<?= htmlspecialchars($prescription->prescription_no) ?>" readonly="true">
-            </div>
-        </div>
+  <div class="form-page-card mb-4">
+    <div class="card-header">
+      <i class="bi bi-file-earmark-medical"></i> Prescription Details
     </div>
-
-    <div class="form-group">
-        <div class="col-md-8">
-            <label class="col-md-4 control-label" for="PatientID">Patient:</label>
-            <div class="col-md-8">
-                <select class="form-control input-sm" id="PatientID" name="patient_id" required>
-                    <option value="">-- Select Patient --</option>
-                    <?php foreach ($patients as $patient): ?>
-                        <option value="<?= $patient->PatientID ?>" 
-                            <?= $patient->PatientID == $prescription->patient_id ? 'selected' : '' ?>>
-                            <?= htmlspecialchars($patient->patient_name) ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label" for="PrescriptionNo">Prescription ID</label>
+          <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-hash"></i></span>
+            <input class="form-control" id="PrescriptionNo" type="text" value="<?php echo htmlspecialchars($prescriptionNo); ?>" readonly>
+          </div>
         </div>
-    </div>
-
-    <div class="form-group">
         <div class="col-md-8">
-            <label class="col-md-4 control-label" for="MedicineName">Medicine Name:</label>
-            <div class="col-md-8">
-                <input class="form-control input-sm" id="MedicineName" name="medicine_name" placeholder="Medicine Name" type="text" 
-                       value="<?= htmlspecialchars($prescription->medicine_name) ?>" required>
-            </div>
+          <label class="form-label" for="PatientID">Patient <span class="required">*</span></label>
+          <select class="form-select select2" id="PatientID" name="patient_id" required>
+            <option value="">Select patient...</option>
+            <?php foreach ($patients as $patient): ?>
+              <option value="<?php echo (int)$patient->PatientID; ?>" <?php echo ((int)$patient->PatientID === (int)$prescription->patient_id) ? 'selected' : ''; ?>>
+                <?php echo htmlspecialchars(trim($patient->patient_name)); ?>
+              </option>
+            <?php endforeach; ?>
+          </select>
+          <div class="invalid-feedback">Please select a patient.</div>
         </div>
+      </div>
     </div>
+  </div>
 
-    <div class="form-group">
-        <div class="col-md-8">
-            <label class="col-md-4 control-label" for="Dosage">Dosage:</label>
-            <div class="col-md-8">
-                <input class="form-control input-sm" id="Dosage" name="dosage" placeholder="e.g., Tablet twice daily" 
-                       value="<?= htmlspecialchars($prescription->dosage) ?>" required>
-            </div>
-        </div>
+  <div class="form-page-card mb-4">
+    <div class="card-header">
+      <i class="bi bi-capsule"></i> Medicine Information
     </div>
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label" for="MedicineName">Medicine Name <span class="required">*</span></label>
+          <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-prescription2"></i></span>
+            <input class="form-control" id="MedicineName" name="medicine_name" placeholder="e.g. Amoxicillin 500mg" type="text" value="<?php echo htmlspecialchars($prescription->medicine_name); ?>" required>
+          </div>
+          <div class="invalid-feedback">Medicine name is required.</div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" for="Dosage">Dosage <span class="required">*</span></label>
+          <input class="form-control" id="Dosage" name="dosage" placeholder="e.g. 1 tablet twice daily" value="<?php echo htmlspecialchars($prescription->dosage); ?>" required>
+          <div class="invalid-feedback">Dosage is required.</div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" for="Timing">Timing</label>
+          <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-clock"></i></span>
+            <input class="form-control" id="Timing" name="timing" placeholder="e.g. After meal / Before sleep" value="<?php echo htmlspecialchars($prescription->timing); ?>">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-    <div class="form-group">
-        <div class="col-md-8">
-            <label class="col-md-4 control-label" for="Timing">Timing:</label>
-            <div class="col-md-8">
-                <input class="form-control input-sm" id="Timing" name="timing" placeholder="e.g., After meal / Before sleep" 
-                       value="<?= htmlspecialchars($prescription->timing) ?>">
-            </div>
-        </div>
+  <div class="form-page-card">
+    <div class="card-header">
+      <i class="bi bi-journal-medical"></i> Medical Advice
     </div>
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-12">
+          <label class="form-label" for="MedicalAdvice">Additional Notes</label>
+          <textarea class="form-control" id="MedicalAdvice" name="medical_advice" placeholder="Any special instructions or medical advice for the patient..." rows="3"><?php echo htmlspecialchars($prescription->medical_advice); ?></textarea>
+        </div>
+      </div>
 
-    <div class="form-group">
-        <div class="col-md-8">
-            <label class="col-md-4 control-label" for="MedicalAdvice">Medical Advice:</label>
-            <div class="col-md-8">
-                <textarea class="form-control input-sm" id="MedicalAdvice" name="medical_advice" placeholder="Medical Advice"><?= htmlspecialchars($prescription->medical_advice) ?></textarea>
-            </div>
-        </div>
+      <div class="form-actions">
+        <button class="btn btn-primary" name="save" type="submit">
+          <i class="bi bi-check-lg"></i> Update Prescription
+        </button>
+        <a href="index.php?view=prescriptions" class="btn btn-outline-secondary">
+          <i class="bi bi-x-lg"></i> Cancel
+        </a>
+      </div>
     </div>
-
-    <div class="form-group">
-        <div class="col-md-8">
-            <label class="col-md-4 control-label" for="idno"></label>
-            <div class="col-md-8">
-                <button class="btn btn-success btn-md" name="save" type="submit"><span class="fa fa-save fw-fa"></span> Update Prescription</button>
-                <a href="index.php?view=list" class="btn btn-md btn-default"><span class="glyphicon glyphicon-arrow-left"></span>&nbsp;<strong>Back</strong></a>
-            </div>
-        </div>
-    </div>
+  </div>
 
 </form>
+
+<script>
+(function () {
+  var form = document.getElementById('prescriptionForm');
+
+  function shakeField(field) {
+    field.classList.add('form-shake');
+    setTimeout(function () { field.classList.remove('form-shake'); }, 400);
+  }
+
+  form.addEventListener('submit', function (e) {
+    var isValid = true;
+    ['PatientID', 'MedicineName', 'Dosage'].forEach(function (id) {
+      var field = document.getElementById(id);
+      var empty = !field.value.trim();
+      field.classList.toggle('is-invalid', empty);
+      if (empty) {
+        isValid = false;
+        shakeField(field);
+      }
+    });
+
+    if (!isValid) {
+      e.preventDefault();
+      var firstInvalid = form.querySelector('.is-invalid');
+      if (firstInvalid) {
+        firstInvalid.focus();
+        firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+  });
+
+  form.querySelectorAll('.form-control, .form-select').forEach(function (field) {
+    field.addEventListener('input', function () {
+      if (field.classList.contains('is-invalid') && field.value.trim()) {
+        field.classList.remove('is-invalid');
+      }
+    });
+    field.addEventListener('change', function () {
+      if (field.classList.contains('is-invalid') && field.value.trim()) {
+        field.classList.remove('is-invalid');
+      }
+    });
+  });
+
+  if ($.fn.select2) {
+    $('#PatientID').select2({ width: '100%', placeholder: 'Select patient...' });
+    $('#PatientID').on('change', function () {
+      if ($(this).val()) {
+        $(this).removeClass('is-invalid');
+      }
+    });
+  }
+})();
+</script>
